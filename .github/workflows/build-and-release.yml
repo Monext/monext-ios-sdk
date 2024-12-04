@@ -1,0 +1,259 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ master, main ]
+
+jobs:
+  build:
+    runs-on: macos-14
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+      should-release: ${{ steps.check-release.outputs.should-release }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Xcode 16.2
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: '16.2'
+
+    - name: Download iOS and iOS Simulator Platforms
+      run: |
+        set -e
+        echo "⬇️ Downloading iOS Platform..."
+        xcodebuild -downloadPlatform iOS
+        echo "⬇️ Downloading iOS Simulator Platform..."
+        xcodebuild -downloadPlatform "iOS Simulator"
+        echo "📱 SDKs after download:"
+        xcodebuild -showsdks
+        echo "🔎 Runtimes:"
+        xcrun simctl list runtimes
+        echo "✅ Verifying SDK paths..."
+        xcrun --sdk iphoneos --show-sdk-path
+        xcrun --sdk iphonesimulator --show-sdk-path
+
+    - name: Get version from plist
+      id: get-version
+      run: |
+        VERSION=$(plutil -extract CFBundleShortVersionString raw Sources/Monext/AppMetadata.plist)
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "📦 Version détectée: $VERSION"
+
+    - name: Check if release should be created
+      id: check-release
+      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+      run: |
+        VERSION="${{ steps.get-version.outputs.version }}"
+        if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+          echo "should-release=false" >> $GITHUB_OUTPUT
+          echo "🏷️ Tag v$VERSION existe déjà, pas de release"
+        else
+          echo "should-release=true" >> $GITHUB_OUTPUT
+          echo "✨ Nouvelle version détectée: v$VERSION"
+        fi
+
+    - name: Configure API Key
+      env:
+        NETCETERA_API_KEY: ${{ secrets.NETCETERA_API_KEY }}
+      run: |
+        if [ -z "$NETCETERA_API_KEY" ]; then
+          echo "⚠️ NETCETERA_API_KEY secret non configuré"
+          exit 1
+        fi
+        sed -i '' "s/\${NETCETERA_API_KEY}/$NETCETERA_API_KEY/g" Sources/Monext/AppMetadata.plist
+        echo "🔑 Clé API configurée"
+
+    - name: Clean build folders
+      run: |
+        rm -rf .build build dist Package.resolved .swiftpm/xcode
+
+    - name: Resolve SPM dependencies
+      run: |
+        swift package resolve
+        swift package show-dependencies
+
+    - name: Run unit tests (iOS Simulator)
+      env:
+        SCHEME_FALLBACK: Monext
+        SCHEME_TESTS: Monext-Package
+      run: |
+        set -euo pipefail
+
+        # Déterminer le schéma de test: "Monext-Package" si présent, sinon "Monext"
+        SCHEME="$SCHEME_TESTS"
+        if ! xcodebuild -list -json 2>/dev/null | grep -q "\"$SCHEME_TESTS\""; then
+          SCHEME="$SCHEME_FALLBACK"
+        fi
+        echo "➡️ Using test scheme: $SCHEME"
+
+        # Choisir la version d'OS simulée depuis l'iphonesimulator SDK
+        OS_VER="$(xcrun --sdk iphonesimulator --show-sdk-version)" # ex: 18.2
+        RUNTIME_ID="com.apple.CoreSimulator.SimRuntime.iOS-${OS_VER//./-}"
+
+        # Choisir un device type disponible (iPhone 16 sinon iPhone 15)
+        DEVICETYPE="iPhone 16"
+        if ! xcrun simctl list devicetypes | grep -q "$DEVICETYPE"; then
+          DEVICETYPE="iPhone 15"
+        fi
+        echo "🛠️ Creating simulator: $DEVICETYPE ($RUNTIME_ID)"
+        UDID="$(xcrun simctl create 'Monext-CI' "$DEVICETYPE" "$RUNTIME_ID")"
+        trap 'xcrun simctl delete "$UDID" || true' EXIT
+
+        # (Optionnel) attendre que le runtime soit prêt
+        xcrun simctl bootstatus "$UDID" -b || true
+
+        echo "🧪 Running tests on simulator $UDID (iOS $OS_VER)..."
+        xcodebuild \
+          -scheme "$SCHEME" \
+          -configuration Debug \
+          -sdk iphonesimulator \
+          -destination "id=$UDID" \
+          -derivedDataPath build \
+          test
+
+    - name: Build XCFramework
+      run: |
+        chmod +x build_xcframework.sh
+        bash -x build_xcframework.sh
+
+    - name: Prepare release bundle
+      run: |
+        VERSION="${{ steps.get-version.outputs.version }}"
+        zip -r "Monext-${VERSION}.zip" dist/Monext.xcframework -x "*.DS_Store*"
+        ls -l dist || true
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: monext-build-${{ steps.get-version.outputs.version }}
+        path: |
+          dist/Monext.xcframework
+          Monext-${{ steps.get-version.outputs.version }}.zip
+        retention-days: 90
+
+  release:
+    needs: build
+    runs-on: macos-latest
+    if: needs.build.outputs.should-release == 'true'
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: monext-build-${{ needs.build.outputs.version }}
+
+    - name: Generate Release Notes
+      id: release-notes
+      run: |
+        set -e
+        VERSION="${{ needs.build.outputs.version }}"
+        LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+        if [ -n "$LAST_TAG" ]; then
+          COMMITS=$(git log $LAST_TAG..HEAD --oneline --pretty=format:"- %s (%h)")
+        else
+          COMMITS=$(git log --oneline --pretty=format:"- %s (%h)" -10)
+        fi
+        cat > release-notes.md << EOF
+        ## 🚀 Monext v$VERSION
+
+        ### 📋 Changements
+        $COMMITS
+        
+        ### 🔧 Installation
+        Monext iOS SDK is available via [Swift Package Manager](https://www.swift.org/documentation/package-manager/).
+        
+        ### Swift Package Manager
+        
+        1. **Add the Package Dependency:**  
+           Follow Apple’s guide on [Adding Package Dependencies to Your App](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app).
+        
+        2. **Enter the Repository URL:**
+           ```
+           https://github.com/Monext/monext-ios-sdk
+           ```  
+        
+        3. **Specify the Version:**  
+           Use version `$VERSION` or later.
+
+        ### 📦 Contenu de la release
+        - Monext.xcframework
+        - Archive zip
+
+        ---
+        **Build Date:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+        **Commit:** \`${{ github.sha }}\`
+        EOF
+
+    - name: Create Release and Upload Assets
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v${{ needs.build.outputs.version }}
+        name: 🚀 Monext v${{ needs.build.outputs.version }}
+        body_path: release-notes.md
+        draft: false
+        prerelease: false
+        files: |
+          Monext-${{ needs.build.outputs.version }}.zip
+          dist/Monext.xcframework
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  notify:
+    needs: [build, release]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+    - name: Notify Success
+      if: needs.release.result == 'success'
+      env:
+          TEAMS_WEBHOOK_URL: ${{ secrets.URL_WEBHOOK_TEAMS }}
+      run: |
+        VERSION="${{ needs.build.outputs.version }}"
+        echo "✅ Release v${VERSION} créée avec succès!"
+        echo "🔗 https://github.com/${{ github.repository }}/releases/tag/v${{ needs.build.outputs.version }}"
+        cat > teams-release-notification.json <<EOF
+        {
+            "type": "AdaptiveCard",
+            "body": [
+                {
+                    "type": "TextBlock",
+                    "size": "Medium",
+                    "weight": "Bolder",
+                    "text": "Nouvelle Release Publiée ! (SDK iOS) "
+                },
+                {
+                    "type": "TextBlock",
+                    "text": "Version v${VERSION}",
+                    "wrap": true
+                }
+            ],
+            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+            "version": "1.5",
+            "actions": [
+                {
+                    "type": "Action.OpenUrl",
+                    "title": "Voir la Release",
+                    "url": "https://github.com/Monext/monext-ios-sdk/releases/tag/v${VERSION}"
+                }
+            ]
+        }
+        EOF
+        curl -H "Content-Type: application/json" -d @teams-release-notification.json "$TEAMS_WEBHOOK_URL"
+        
+
+    - name: Notify Failure
+      if: needs.build.result == 'failure' || needs.release.result == 'failure'
+      run: |
+        echo "❌ Échec du build ou de la release"
+        exit 1

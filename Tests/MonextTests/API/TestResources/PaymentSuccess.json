@@ -1,0 +1,82 @@
+{
+  "token": "1cEtH2D3ogZsaJ4PE1531746023359858",
+  "type": "PAYMENT_SUCCESS",
+  "creationDate": "Wed Apr 30 16:07:44 CEST 2025",
+  "cancelUrl": "https://yourdomain.com:8080/route/1.0/returns?paylinetoken=162BUHaMVp8CKvd9T1521746021998615",
+  "pointOfSale": "POS_MyLuckyDay",
+  "language": "fr",
+  "returnUrl": "https://yourdomain.com:8080/route/1.0/returns?paylinetoken=162BUHaMVp8CKvd9T1521746021998615",
+  "automaticRedirectAtSessionsEnd": false,
+  "info": {
+    "PaylineBuyerIp": "92.184.140.237",
+    "PaylineFormattedAmount": "333,00 EUR",
+    "PaylineOrderDate": "30/04/2025 16:06",
+    "PaylineOrderRef": "697BC5CC-57B0-4DCE-9D59-53F157DD9B79",
+    "PaylineFormattedOrderAmount": "333,00 EUR",
+    "PaylineOrderAmountSmallestUnit": 33300,
+    "PaylineAmountSmallestUnit": 33300,
+    "PaylineCurrencyDigits": 2,
+    "PaylineMerchantCountry": "FR",
+    "PaylineCurrencyCode": "EUR"
+  },
+  "pointOfSaleAddress": {
+    "address1": "27 Rue Tupin",
+    "address2": "",
+    "zipCode": "69002",
+    "city": "LYON"
+  },
+  "isSandbox": true,
+  "scripts": [],
+  "paymentSuccess": {
+    "ticket": [
+      {
+        "i": false,
+        "k": "Date et heure",
+        "v": "LE  30/04/2025 A  16:07 CEST",
+        "t": 0
+      },
+      {
+        "i": true,
+        "k": "Boutique",
+        "v": "POS_MyLuckyDay",
+        "t": 0
+      },
+      {
+        "i": false,
+        "k": "Terminal / Accepteur",
+        "v": "60 185 658 219 108",
+        "t": 0
+      },
+      {
+        "i": false,
+        "k": "Numéro de transaction",
+        "v": "PPL25043016071498602",
+        "t": 0
+      },
+      {
+        "i": false,
+        "k": "Type de transaction",
+        "v": "DEBIT VADS @",
+        "t": 0
+      },
+      {
+        "i": false,
+        "s": "ticketAmount",
+        "k": "Montant",
+        "v": "333,00 EUR",
+        "t": 0
+      },
+      {
+        "i": false,
+        "s": "ticketKeep",
+        "v": "TICKET CLIENT A CONSERVER",
+        "t": 0
+      }
+    ],
+    "paymentCard": "PAYPAL",
+    "selectedCardCode": "PAYPAL",
+    "selectedContractNumber": "PAYPAL_SDK_MLD",
+    "displayTicket": true,
+    "fragmented": false
+  }
+}

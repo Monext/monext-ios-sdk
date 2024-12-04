@@ -1,0 +1,34 @@
+{
+  "directoryServerSdkKeyList": [
+    {
+      "scheme": "CB",
+      "rid": "MOCK_RID_1",
+      "publicKey": "MOCK_PUBLIC_KEY_1",
+      "rootPublicKey": "MOCK_ROOT_PUBLIC_KEY_1"
+    },
+    {
+      "scheme": "VISA",
+      "rid": "MOCK_RID_2",
+      "publicKey": "MOCK_PUBLIC_KEY_2",
+      "rootPublicKey": "MOCK_ROOT_PUBLIC_KEY_2"
+    },
+    {
+      "scheme": "MASTERCARD",
+      "rid": "MOCK_RID_3",
+      "publicKey": "MOCK_PUBLIC_KEY_3",
+      "rootPublicKey": "MOCK_ROOT_PUBLIC_KEY_3"
+    },
+    {
+      "scheme": "AMEX",
+      "rid": "MOCK_RID_4",
+      "publicKey": "MOCK_PUBLIC_KEY_4",
+      "rootPublicKey": "MOCK_ROOT_PUBLIC_KEY_4"
+    },
+    {
+      "scheme": "DINERS",
+      "rid": "MOCK_RID_5",
+      "publicKey": "MOCK_PUBLIC_KEY_5",
+      "rootPublicKey": "MOCK_ROOT_PUBLIC_KEY_5"
+    }
+  ]
+}

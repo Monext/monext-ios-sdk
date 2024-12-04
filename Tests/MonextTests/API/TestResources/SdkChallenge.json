@@ -1,0 +1,62 @@
+{
+  "token": "1cEtH2D3ogZsaJ4PE1531746023359858",
+  "type": "SDK_CHALLENGE",
+  "creationDate": "Jul 31, 2025, 2:29:33 PM",
+  "cancelUrl": "https://yourdomain.com:8080/route/1.0/returns?paylinetoken=1kvCxUBmHjSo4FGbE1291753964958553",
+  "returnUrl": "https://yourdomain.com:8080/route/1.0/returns?paylinetoken=1kvCxUBmHjSo4FGbE1291753964958553",
+  "automaticRedirectAtSessionsEnd": false,
+  "message": null,
+  "pointOfSale": "LBI_POS",
+  "pointOfSaleAddress": {
+    "address1": "123 rue des petits poids",
+    "address2": "",
+    "zipCode": "13100",
+    "city": "Aix en Provence"
+  },
+  "isSandbox": true,
+  "fragmented": false,
+  "info": {
+    "PaylineBuyerTitle": null,
+    "PaylineBuyerIp": "172.22.119.12",
+    "PaylineFormattedAmount": "1,00 EUR",
+    "PaylineBuyerLastName": null,
+    "PaylineOrderDate": "31/07/2025 14:29",
+    "PaylineOrderRef": "ff62bd25-737f-42ce-b734-62774f8084d5",
+    "PaylineFormattedOrderAmount": "1,00 EUR",
+    "PaylineOrderAmountSmallestUnit": 100,
+    "PaylineBuyerEmail": null,
+    "PaylineBuyerFirstName": null,
+    "PaylineBuyerMobilePhone": null,
+    "PaylineOrderDeliveryMode": "",
+    "PaylineAmountSmallestUnit": 100,
+    "PaylineCurrencyDigits": 2,
+    "PaylineMerchantCountry": "FR",
+    "PaylineOrderDetails": [],
+    "PaylineOrderDeliveryTime": "",
+    "PaylineCurrencyCode": "EUR"
+  },
+  "stateSpecificData": {
+    "sdkChallengeData": {
+      "cardType": 1,
+      "threeDSServerTransID": "8226e99b-31fb-5ced-8000-00000052e890",
+      "threeDSVersion": "2.2.0",
+      "authenticationType": "01",
+      "transStatus": "C",
+      "sdkTransID": "11de43b8-61fd-4426-b12d-69ea38f1f281",
+      "dsTransID": "c2cb12c9-cf70-40ae-9a0d-19357cee74cc",
+      "acsTransID": "e49c0873-deea-45fd-b933-df11e38af937",
+      "acsRenderingType": "01,01",
+      "acsReferenceNumber": "3DS_LOA_ACS_MOMD_020301_00793",
+      "acsSignedContent": "eyJ4NWMiOlsiTUlJRElqQ0NBZ29DQVFFd0RRWUpLb1pJaHZjTkFRRUxCUUF3VnpFUU1BNEdBMVVFQ3hNSFZHVnpkR2x1WnpFUU1BNEdBMVVFQ2hNSFRXOWthWEoxYlRFTk1Bc0dBMVVFQnhNRVQzTnNiekVMTUFrR0ExVUVCaE1DVGs4eEZUQVRCZ05WQkFNVERETmtjeTFoWTNNZ2FtRjNjekFlRncweE9UQXlNVE14TURRME1qUmFGdzB5T1RBeU1UQXhNRFEwTWpSYU1GY3hFREFPQmdOVkJBc1RCMVJsYzNScGJtY3hFREFPQmdOVkJBb1RCMDF2WkdseWRXMHhEVEFMQmdOVkJBY1RCRTl6Ykc4eEN6QUpCZ05WQkFZVEFrNVBNUlV3RXdZRFZRUURFd3d6WkhNdFlXTnpJR3BoZDNNd2dnRWlNQTBHQ1NxR1NJYjNEUUVCQVFVQUE0SUJEd0F3Z2dFS0FvSUJBUUM1dHZMNVhBZXlQOGZRV3Y5d243c0M4QTRZa3R2amRIZW5uU0V0Q1FHMmlwZlplWndaa1BPR3JIVmFZZXBJWWZPVWhYWmU2WEYvMlIyb1NkOGlCbWFKRFJ3Tko0ZWR1b2VRZUVuWE9UWHRwQmpoWUJCUjdzTG1WZTVCSmJ1elBuV3c1bGlrVUt4Y05NQS9RSGNndWVMTGR5NE8yU01FMG5pVEllcjYvNUJmMko1UkhUT3lwcnNnVHlBZUpDSXBMT1QxeEVETHd4Wmo5K2pBYVFxejZBaFgrWXU3N095NVowbFlic3FFdGNQa1RZMitMUGNNWVVMUnBkYm13b0NYOUlCb2FERXhYek1CdVI2QjJBYXFLTE1lb3d1QjBGL0NmUHE2R2NobXVMWk1lUVNqSmkyUDBZWWVVR210QlVhdU1QQ1Q4QXdCaU5Pc1JSVnMzQUFGYTVwWkFnTUJBQUV3RFFZSktvWklodmNOQVFFTEJRQURnZ0VCQUhTOVRRZENiM2p0dHFiWUFTdFZ1dDNlRzJMalRxRkVVWkNlb1hHdFROaTVJUk5zU1BlK2ZDWXdzQm9Ud1dwajlNQm5Da1htKzRJU2xuY2I0SmtFMyt4ZzRJVHZ0bURTMlBZeHovQ05ObWxpVnV5ck9ON0pDRXlTUW9BaGxJMnFGNjdiOUw5dDZDUnNWK0xNOFZUQkhHOXpydFh1UlpDVGxlU1VsTHFXMTdVSXRva0J0RzBNNWlES01GQ2V1RXVBZUQzbSt3RVVIU2NKcGR1eHE5UHFidy9KVGo4ejU5QWgxTG5JdW1mQjVFZDZDU2JXZGQzRWJ3S2R2NExqbWJBUkZmWkozeGpUUDFLTWlHMzdxOEZFUU8wRmxlYXF5Q0UvZWNnbVNFVExRVGhPOWFKeDV0ejE4cXRPNGhVSWU0SmRuMkNxY1V5MWxsYlh2SmhqSWFGVy8vTT0iXSwiYWxnIjoiUFMyNTYifQ.eyJhY3NVUkwiOiJodHRwczpcL1wvM2RzLWFjcy5zdGFnaW5nLm1vZGlydW0uY29tXC9tZHBheWFjc1wvY3JlcWFwcCIsImFjc0VwaGVtUHViS2V5Ijp7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoiNFJ3SWI5VVg3ZjJQb0RyUDBWSExadmJSNlJUc1lqWXZkckNuSHhxZFpKWSIsInkiOiJvXzE5SVZVTENvYjFEVVVKeUJKSEQ3R1hGNDVVWVJrUlZDYVVDS1BZRmtzIn0sInNka0VwaGVtUHViS2V5Ijp7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoieElWRzIwSlNFU21BX0Z1X0dZSlNydzhXc1c4WXN0SF9UZ0NadTBISGJNayIsInkiOiJrQ0c0VTFybDgxOEtzTkx5bGhhOGFram9mdHZHZm0wbDFROVA0SkZ5ZWRVIn19.aSg77Ny159HU-j0CoW7q6UymBnNdaQ1pHYZKO25v1s7m1oSFUQVF9dcXVLFGTJoBJoWPGP6nRAN3Twp4np_VhtYOTVGpnQt_58fO3nrQy5Uv7PTeO_i2uUiChzTSjtbltLYaxr0gyKkENVf5dZKnYPG-hKLBesejFTHwqf9rUXt4HFvPMwpyXJ92QJTZSIkMfsAXr51JtlWLUBK5O_elvOR82G9VhUklIhvFJ0dN0DEySRE-h1VvaLUqsCgccx99q4iY1GTBs2S2Q4RWbkTVxOVvxXlMCxy1tmRvg_WSoE2ws5aE5s_QZuRdCCyDPAPUCyBRo9-rFXJm6Vq8RZSMmA",
+      "acsOperatorID": "3DS_LOA_ACS_MOMD_020301_00793",
+      "acsChallengeMandated": "N"
+    },
+    "redirectionContextDataSecured": null,
+    "contractNumber": "CB3DSV2",
+    "redirectionContextData": "{\"paymentMode\":\"CPT\",\"lclfResult\":{\"FRAUD_ACTION\":\"NONE\",\"RETURN_CODE\":\"04000\",\"NEED_POST_CALL\":\"true\",\"EXTERNAL_TRANSACTION_ID\":\"LF00528844531601\",\"FRAUD_CODE\":\"04000\",\"IS_LCLF_V2\":\"Y\",\"BLOCK_CAPTURE\":\"false\",\"FRAUD_LIST\":\"StandardList\"},\"creditConditionsAccepted\":false,\"md\":\"3366b264-8c1d-4dc3-8584-be63d326363d\",\"challengeWindowSize\":\"02\"}"
+  },
+  "language": "fr",
+  "neededInfosContext": null,
+  "fragmentedPaymentData": null,
+  "scripts": []
+}

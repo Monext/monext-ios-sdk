@@ -1,0 +1,24 @@
+{
+  "originHash" : "8629114665fa2f623453a96b1eedfb885f805145a1b23a20941a8a2f06d2ba2e",
+  "pins" : [
+    {
+      "identity" : "spm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ios-3ds-sdk/SPM.git",
+      "state" : {
+        "revision" : "421449969baa6ef80c33fd077c217f724ccfd348",
+        "version" : "2.5.30"
+      }
+    },
+    {
+      "identity" : "viewinspector",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/nalexn/ViewInspector.git",
+      "state" : {
+        "revision" : "a6fcac8485bc8f57b2d2b55bb6d97138e8659e4b",
+        "version" : "0.10.2"
+      }
+    }
+  ],
+  "version" : 3
+}

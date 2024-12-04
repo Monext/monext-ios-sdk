@@ -1,0 +1,53 @@
+{
+   "token":"1cEtH2D3ogZsaJ4PE1531746023359858",
+   "type":"PAYMENT_REDIRECT_NO_RESPONSE",
+   "creationDate":"Fri Aug 01 15:14:16 CEST 2025",
+   "cancelUrl":"https://yourdomain.com:8080/route/1.0/returns?paylinetoken\u003d12KLvIwHoElacRdf41571754054002279",
+   "pointOfSale":"POS_MyLuckyDay",
+   "language":"fr",
+   "returnUrl":"https://yourdomain.com:8080/route/1.0/returns?paylinetoken\u003d12KLvIwHoElacRdf41571754054002279",
+   "automaticRedirectAtSessionsEnd":false,
+   "info":{
+      "PaylineBuyerIp":"86.211.126.54",
+      "PaylineFormattedAmount":"10,00 EUR",
+      "PaylineOrderDate":"01/08/2025 15:13",
+      "PaylineOrderRef":"f3798c1c-4640-4bc9-aca5-3345c61c1d15",
+      "PaylineFormattedOrderAmount":"10,00 EUR",
+      "PaylineOrderAmountSmallestUnit":1000,
+      "PaylineOrderDeliveryMode":"",
+      "PaylineAmountSmallestUnit":1000,
+      "PaylineCurrencyDigits":2,
+      "PaylineMerchantCountry":"FR",
+      "PaylineOrderDetails":[
+         
+      ],
+      "PaylineOrderDeliveryTime":"",
+      "PaylineCurrencyCode":"EUR"
+   },
+   "pointOfSaleAddress":{
+      "address1":"27 Rue Tupin",
+      "address2":"",
+      "zipCode":"69002",
+      "city":"LYON"
+   },
+   "isSandbox":true,
+   "scripts":[
+      
+   ],
+   "paymentRedirectNoResponse":{
+      "redirectionData":{
+         "requestType":"GET",
+         "requestUrl":"https://www.sandbox.paypal.com/checkoutnow?token\u003d9G3017513W3850540",
+         "iframeEmbeddable":false,
+         "iframeHeight":0,
+         "iframeWidth":0,
+         "timeoutInMs":0,
+         "hasPartnerLogo":false,
+         "isCompletionMethod":false
+      },
+      "cardCode":"PAYPAL_APIREST",
+      "contractNumber":"PAYPAL_APIREST_SDK",
+      "walletCardIndex":0
+   }
+}
+

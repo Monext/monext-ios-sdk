@@ -1,0 +1,764 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        }
+      }
+    },
+    "! TEST !\nMODE" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "! TEST !\nMODE"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "! TEST !\nMODE"
+          }
+        }
+      }
+    },
+    "Accepted Cards" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cartes acceptées"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carte accettate"
+          }
+        }
+      }
+    },
+    "Back to the app" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retour sur l'application"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Torna all'app"
+          }
+        }
+      }
+    },
+    "Card" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carte"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carta"
+          }
+        }
+      }
+    },
+    "Card number" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Numéro de carte"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Numero della carta"
+          }
+        }
+      }
+    },
+    "Congratulations" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Félicitations"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Congratulazioni"
+          }
+        }
+      }
+    },
+    "CVV" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CVV"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CVV"
+          }
+        }
+      }
+    },
+    "Default" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Défaut"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Predefinito"
+          }
+        }
+      }
+    },
+    "Exit" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuler"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uscita"
+          }
+        }
+      }
+    },
+    "Exit Payment" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuler le paiement"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pagamento di uscita"
+          }
+        }
+      }
+    },
+    "Exp. %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exp. %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exp. %@"
+          }
+        }
+      }
+    },
+    "Expiry" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expiration"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scadenza"
+          }
+        }
+      }
+    },
+    "I want to save my credit card information for later." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrer mes informations de paiement."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desidero salvare i dati della mia carta di credito per un utilizzo futuro."
+          }
+        }
+      }
+    },
+    "I want to save my payment information for later." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrer mes informations de paiement."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desidero salvare i miei dati di pagamento per un utilizzo futuro."
+          }
+        }
+      }
+    },
+    "Info" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Info"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informazioni"
+          }
+        }
+      }
+    },
+    "Invalid Card Number" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Numéro de carte non valide"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Numero carta non valido"
+          }
+        }
+      }
+    },
+    "Invalid CVV" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CVV non valide"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CVV non valido"
+          }
+        }
+      }
+    },
+    "Invalid Expiration Date" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date d’expiration non valide"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data di scadenza non valida"
+          }
+        }
+      }
+    },
+    "Invalid Format" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Format non valide"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Formato non valido"
+          }
+        }
+      }
+    },
+    "Name on card" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titulaire de la carte"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome sulla carta"
+          }
+        }
+      }
+    },
+    "Next" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suivant"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avanti"
+          }
+        }
+      }
+    },
+    "Pay %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Payer %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paga %@"
+          }
+        }
+      }
+    },
+    "Pay with" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Payer avec"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paga con"
+          }
+        }
+      }
+    },
+    "Payment Method not implemented" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moyen de paiement non pris en charge"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Metodo di pagamento non implementato"
+          }
+        }
+      }
+    },
+    "Payment pending" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paiement en attente"
+          }
+        }
+      }
+    },
+    "Please change your payment method." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veuillez sélectionner un autre moyen de paiement."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifica il tuo metodo di pagamento."
+          }
+        }
+      }
+    },
+    "Please enter the security code written on your card. It may have 3 or 4 digits." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veuillez saisir le cryptogramme visuel imprimé sur votre carte bancaire."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inserisci il codice di sicurezza riportato sulla tua carta. Può essere composto da 3 o 4 cifre."
+          }
+        }
+      }
+    },
+    "Please select your preferred card network." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionnez votre réseau préféré."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seleziona il circuito di carte di credito che preferisci."
+          }
+        }
+      }
+    },
+    "Please wait as we contact your bank." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veuillez patienter, nous interrogeons votre banque."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attendi mentre contattiamo la tua banca."
+          }
+        }
+      }
+    },
+    "Preferred payment methods" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moyens de paiement préférés"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Metodi di pagamento preferiti"
+          }
+        }
+      }
+    },
+    "Stay" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rester"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stay"
+          }
+        }
+      }
+    },
+    "Test CardNetwork" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test réseaux"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scheda di prova Rete"
+          }
+        }
+      }
+    },
+    "Test CVV" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test CVV"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test CVV"
+          }
+        }
+      }
+    },
+    "Test Exit Payment" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test Annuler le paiement"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pagamento di uscita dal test"
+          }
+        }
+      }
+    },
+    "Unknown card type" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type de carte inconnu"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipo di carta sconosciuto"
+          }
+        }
+      }
+    },
+    "View all my Wallet" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir tout mon portefeuille"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visualizza tutto il mio portafoglio"
+          }
+        }
+      }
+    },
+    "We are fully compliant with the payment card industry data security standards." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nous sommes certifiés PCI-DSS."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siamo pienamente conformi agli standard di sicurezza dei dati del settore delle carte di pagamento."
+          }
+        }
+      }
+    },
+    "We are sorry" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nous sommes désolés"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ci dispiace"
+          }
+        }
+      }
+    },
+    "You are about to cancel the payment of your order. No amount will be debited from your account." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vous êtes sur le point d'annuler votre paiement. Aucun montant ne sera débité de votre compte."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stai per annullare il pagamento del tuo ordine. Nessun importo verrà addebitato sul tuo conto."
+          }
+        }
+      }
+    },
+    "Your bank refused the payment of %@." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre banque a rejeté le paiement de %@."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La tua banca ha rifiutato il pagamento di %@."
+          }
+        }
+      }
+    },
+    "Your card has two different networks. Please choose the one you prefer to use." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre carte supporte deux réseaux, et vous pouvez choisir celui que vous préférez pour ce paiement"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La tua carta ha due reti diverse. Scegli quella che preferisci utilizzare."
+          }
+        }
+      }
+    },
+    "Your payment has been canceled." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre paiement a été annulé."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il tuo pagamento è stato annullato."
+          }
+        }
+      }
+    },
+    "Your payment is pending. Please contact your merchant for further information." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre paiement est en attente. Veuillez contacter votre commerçant pour plus d’informations."
+          }
+        }
+      }
+    },
+    "Your payment is pending. Please follow the instructions below." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre paiement est en attente. Veuillez suivre les instructions ci-dessous."
+          }
+        }
+      }
+    },
+    "Your payment of %@ for order %@ is pending. Please follow the instructions below." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your payment of %1$@ for order %2$@ is pending. Please follow the instructions below."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre paiement de %1$@ pour la commande %2$@ est en attente. Veuillez suivre les instructions ci-dessous."
+          }
+        }
+      }
+    },
+    "Your payment of %@ has been received. Your order %@ is confirmed. Thank you for your order!" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your payment of %1$@ has been received. Your order %2$@ is confirmed. Thank you for your order!"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre paiement de %1$@ a été validé. Votre commande %2$@ est validée. Merci pour votre commande !"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il pagamento di %1$@ è stato ricevuto. L'ordine %2$@ è confermato. Grazie per l'ordine!"
+          }
+        }
+      }
+    },
+    "Your payment session has expired." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre session de paiement est expirée."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La tua sessione di pagamento è scaduta."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

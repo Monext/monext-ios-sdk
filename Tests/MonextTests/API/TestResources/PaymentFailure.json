@@ -1,0 +1,46 @@
+{
+   "token":"1cEtH2D3ogZsaJ4PE1531746023359858",
+   "type":"PAYMENT_FAILURE",
+   "creationDate":"Fri Aug 01 15:21:27 CEST 2025",
+   "cancelUrl":"https://yourdomain.com:8080/route/1.0/returns?paylinetoken\u003d1paTw89zYMV3XW1lp1351754054451912",
+   "pointOfSale":"LBI_POS",
+   "language":"fr",
+   "returnUrl":"https://yourdomain.com:8080/route/1.0/returns?paylinetoken\u003d1paTw89zYMV3XW1lp1351754054451912",
+   "automaticRedirectAtSessionsEnd":false,
+   "info":{
+      "PaylineBuyerIp":"172.22.119.12",
+      "PaylineFormattedAmount":"1,00 EUR",
+      "PaylineOrderDate":"01/08/2025 15:20",
+      "PaylineOrderRef":"0b7ce842-98a1-4d9b-bbbd-07fd2cc092c2",
+      "PaylineFormattedOrderAmount":"1,00 EUR",
+      "PaylineOrderAmountSmallestUnit":100,
+      "PaylineOrderDeliveryMode":"",
+      "PaylineAmountSmallestUnit":100,
+      "PaylineCurrencyDigits":2,
+      "PaylineMerchantCountry":"FR",
+      "PaylineOrderDetails":[
+         
+      ],
+      "PaylineOrderDeliveryTime":"",
+      "PaylineCurrencyCode":"EUR"
+   },
+   "pointOfSaleAddress":{
+      "address1":"123 rue des petits poids",
+      "address2":"",
+      "zipCode":"13100",
+      "city":"Aix en Provence"
+   },
+   "isSandbox":true,
+   "scripts":[
+      
+   ],
+   "paymentFailure":{
+      "message":{
+         "type":"ERROR",
+         "localizedMessage":"Paiement refusé",
+         "displayIcon":true
+      },
+      "selectedCardCode":"CB",
+      "selectedContractNumber":"CB3DSV2"
+   }
+}

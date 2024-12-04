@@ -1,0 +1,49 @@
+name: Test and Sonar
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+
+jobs:
+  coverage:
+    runs-on: macos-15
+    strategy:
+      matrix:
+        include:
+          - sdk: iphoneos
+            destination: platform=iOS Simulator,OS=18.4,name=iPhone 16
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create symlink for compatibility
+        run: |
+         mkdir -p ${{ github.workspace }}/../
+         ln -s ${{ github.workspace }} ${{ github.workspace }}/../Monext
+      
+      - name: Install xcresultparser
+        run: |
+          brew install xcresultparser
+
+      - name: Install SonarQube Scanner
+        run: |
+          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-6.2.1.4610.zip
+          unzip sonar-scanner-cli-6.2.1.4610.zip
+          echo "${PWD}/sonar-scanner-6.2.1.4610/bin" >> $GITHUB_PATH
+      
+      - name: Execute Coverage
+        run: |
+          set -o pipefail
+          xcodebuild test -sdk ${{ matrix.sdk }} -scheme "Monext" -destination '${{ matrix.destination }}' -enableCodeCoverage YES -resultBundlePath sdk.xcresult -quiet
+          xcodebuild test -project ./Example/Example.xcodeproj -scheme Example -destination '${{ matrix.destination }}' -enableCodeCoverage YES -resultBundlePath ./example.xcresult
+          xcrun xcresulttool merge sdk.xcresult example.xcresult --output-path=results.xcresult
+          xcresultparser -o xml --coverage results.xcresult > sonarqube-generic-coverage.xml
+
+      - name: Run Sonar
+        run: |
+          sonar-scanner -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

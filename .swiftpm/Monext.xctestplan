@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "3B410D76-BCD9-4CB6-83FB-F38DE36E9165",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "MonextTests",
+        "name" : "MonextTests"
+      }
+    }
+  ],
+  "version" : 1
+}

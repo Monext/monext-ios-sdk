@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "D9D31972-1706-4979-A8D6-C71F4FF46FC8",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:Example.xcodeproj",
+        "identifier" : "D99B79F22CA4E2B50010B87C",
+        "name" : "ExampleTests"
+      }
+    }
+  ],
+  "version" : 1
+}

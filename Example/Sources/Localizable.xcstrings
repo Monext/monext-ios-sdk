@@ -1,0 +1,148 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "" : {
+
+    },
+    "-" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "-"
+          }
+        }
+      }
+    },
+    "%lld" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        }
+      }
+    },
+    "+" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+"
+          }
+        }
+      }
+    },
+    "Amount:" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Montant :"
+          }
+        }
+      }
+    },
+    "CHECKOUT" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CHECKOUT"
+          }
+        }
+      }
+    },
+    "CREATE SESSION" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NOUVELLE SESSION"
+          }
+        }
+      }
+    },
+    "Custom" : {
+
+    },
+    "Enter Hostname" : {
+
+    },
+    "Environment" : {
+
+    },
+    "Hostname:" : {
+
+    },
+    "Production" : {
+
+    },
+    "RESET SESSION" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "REDÉMARRER LA SESSION"
+          }
+        }
+      }
+    },
+    "Sandbox" : {
+
+    },
+    "Theme" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thème"
+          }
+        }
+      }
+    },
+    "Token:" : {
+
+    },
+    "Total: %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total : %@"
+          }
+        }
+      }
+    },
+    "Unit Price: %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prix Unitaire : %@"
+          }
+        }
+      }
+    },
+    "User:" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utilisateur :"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

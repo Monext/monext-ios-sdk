@@ -1,0 +1,212 @@
+{
+  "token": "1cEtH2D3ogZsaJ4PE1531746023359858",
+  "type": "PAYMENT_METHODS_LIST",
+  "creationDate": "Wed Apr 30 16:29:21 CEST 2025",
+  "cancelUrl": "https://yourdomain.com:8080/route/1.0/returns?paylinetoken=1cEtH2D3ogZsaJ4PE1531746023359858",
+  "pointOfSale": "POS_MyLuckyDay",
+  "language": "fr",
+  "returnUrl": "https://yourdomain.com:8080/route/1.0/returns?paylinetoken=1cEtH2D3ogZsaJ4PE1531746023359858",
+  "automaticRedirectAtSessionsEnd": false,
+  "info": {
+    "PaylineFormattedAmount": "333,00 EUR",
+    "PaylineOrderDate": "30/04/2025 16:29",
+    "PaylineOrderRef": "A65A192E-CA73-4173-89F0-D4C5C91AAC45",
+    "PaylineFormattedOrderAmount": "333,00 EUR",
+    "PaylineOrderAmountSmallestUnit": 33300,
+    "PaylineAmountSmallestUnit": 33300,
+    "PaylineCurrencyDigits": 2,
+    "PaylineMerchantCountry": "FR",
+    "PaylineCurrencyCode": "EUR"
+  },
+  "pointOfSaleAddress": {
+    "address1": "27 Rue Tupin",
+    "address2": "",
+    "zipCode": "69002",
+    "city": "LYON"
+  },
+  "isSandbox": true,
+  "scripts": [],
+  "paymentMethodsList": {
+    "wallets": [
+      {
+        "cardCode": "PAYPAL",
+        "index": 1,
+        "isDefault": true,
+        "cardType": "PAYPAL",
+        "isExpired": false,
+        "expiredMore6Months": false,
+        "hasCustomLogo": false,
+        "customLogoRatio": 0,
+        "hasCustomLogoUrl": false,
+        "hasCustomLogoBase64": false,
+        "isPmAPI": false,
+        "hasSpecificDisplay": false,
+        "isDeletable": true,
+        "options": [],
+        "additionalData": {
+          "EMAIL": "french3.buyer@payline.net"
+        },
+        "confirm": []
+      },
+      {
+        "cardCode": "CB",
+        "index": 4,
+        "isDefault": false,
+        "cardType": "VISA",
+        "isExpired": false,
+        "expiredMore6Months": false,
+        "hasCustomLogo": false,
+        "customLogoRatio": 0,
+        "hasCustomLogoUrl": false,
+        "hasCustomLogoBase64": false,
+        "isPmAPI": false,
+        "hasSpecificDisplay": false,
+        "isDeletable": true,
+        "options": [],
+        "additionalData": {
+          "DATE": "1230",
+          "HOLDER": "",
+          "PAN": "***-XX19"
+        },
+        "confirm": []
+      },
+      {
+        "cardCode": "CB",
+        "index": 3,
+        "isDefault": false,
+        "cardType": "VISA",
+        "isExpired": false,
+        "expiredMore6Months": false,
+        "hasCustomLogo": false,
+        "customLogoRatio": 0,
+        "hasCustomLogoUrl": false,
+        "hasCustomLogoBase64": false,
+        "isPmAPI": false,
+        "hasSpecificDisplay": false,
+        "isDeletable": true,
+        "options": [],
+        "additionalData": {
+          "DATE": "1230",
+          "HOLDER": "",
+          "PAN": "***-XX40"
+        },
+        "confirm": []
+      },
+      {
+        "cardCode": "CB",
+        "index": 2,
+        "isDefault": false,
+        "cardType": "CB",
+        "isExpired": false,
+        "expiredMore6Months": false,
+        "hasCustomLogo": false,
+        "customLogoRatio": 0,
+        "hasCustomLogoUrl": false,
+        "hasCustomLogoBase64": false,
+        "isPmAPI": false,
+        "hasSpecificDisplay": false,
+        "isDeletable": true,
+        "options": [],
+        "additionalData": {
+          "DATE": "1230",
+          "HOLDER": "",
+          "PAN": "***-XX07"
+        },
+        "confirm": []
+      }
+    ],
+    "isOriginalCreditTransfer": false,
+    "needsDeviceFingerprint": false,
+    "paymentMethods": [
+      {
+        "cardCode": "APPLE_PAY",
+        "contractNumber": "APPLE_PAY_MERCHANT",
+        "paymentMethodAction": 0,
+        "paymentParamsToBeControlled": [],
+        "state": "AVAILABLE",
+        "hasLogo": false,
+        "hasForm": false,
+        "isIsolated": false,
+        "disabled": false,
+        "shouldBeInTopPosition": true,
+        "options": [],
+        "additionalData": {
+          "MERCHANT_CAPABILITIES": [
+            "supports3DS"
+          ],
+          "NETWORKS": [
+            "cartesBancaires",
+            "visa",
+            "masterCard",
+            "amex"
+          ],
+          "APPLE_PAY_MERCHANT_ID": "merchant.com.myluckyday.applepay",
+          "APPLE_PAY_MERCHANT_NAME": "MyLuckyDay",
+          "APPLE_PAY_BUTTON_STYLE": "white-outline",
+          "APPLE_PAY_BUTTON_TYPE": "plain"
+        },
+        "confirm": []
+      },
+      {
+        "cardCode": "CB",
+        "contractNumber": "CB_SDK_MLD",
+        "paymentMethodAction": 0,
+        "paymentParamsToBeControlled": [],
+        "state": "AVAILABLE",
+        "hasLogo": false,
+        "hasForm": false,
+        "isIsolated": false,
+        "disabled": false,
+        "shouldBeInTopPosition": false,
+        "options": [
+          "SAVE_PAYMENT_DATA",
+          "EXPI_DATE",
+          "CVV",
+          "ALT_NETWORK"
+        ],
+        "additionalData": {},
+        "confirm": []
+      },
+      {
+        "cardCode": "AMEX",
+        "contractNumber": "AMEX_SDK_MLD",
+        "paymentMethodAction": 0,
+        "paymentParamsToBeControlled": [],
+        "state": "AVAILABLE",
+        "hasLogo": false,
+        "hasForm": false,
+        "isIsolated": false,
+        "disabled": false,
+        "shouldBeInTopPosition": false,
+        "options": [
+          "SAVE_PAYMENT_DATA",
+          "HOLDER",
+          "EXPI_DATE",
+          "CVV"
+        ],
+        "additionalData": {},
+        "confirm": []
+      },
+      {
+        "cardCode": "PAYPAL",
+        "contractNumber": "PAYPAL_SDK_MLD",
+        "paymentMethodAction": 0,
+        "paymentParamsToBeControlled": [],
+        "state": "AVAILABLE",
+        "hasLogo": false,
+        "hasForm": false,
+        "isIsolated": false,
+        "disabled": false,
+        "shouldBeInTopPosition": false,
+        "options": [
+          "SAVE_PAYMENT_DATA"
+        ],
+        "additionalData": {},
+        "confirm": []
+      }
+    ],
+    "scoringNeeded": false,
+    "sensitiveInputContentMasked": false,
+    "shouldChangePaymentMethodPosition": true
+  }
+}
