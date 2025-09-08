@@ -30,6 +30,8 @@ struct PaymentSheetUiState {
         let challengeParameters: ChallengeParameters
     }
     
+    struct ActiveWaiting: UiState {}
+    
     struct Failure: UiState {}
     
     struct Cancelled: UiState {}

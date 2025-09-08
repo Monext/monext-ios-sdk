@@ -40,6 +40,25 @@ class PaymentAPITests: BaseAPITestCase {
         XCTAssertEqual(token, result.token)
         XCTAssertEqual("PAYMENT_METHODS_LIST", result.type)
     }
+
+    /// Tests thet API endpoint to verify it returns a true boolean
+    /// when it is called with a session that has a state that has been recently updated 
+    func testIsDoneReturnTrue() async throws {
+        // Given
+        let token = "1cEtH2D3ogZsaJ4PE1531746023359858"
+        
+        await setupMockResponse(
+            for: token,
+            endpoint: "isDone",
+            jsonFileName: "isDone"
+        )
+        
+        // When
+        let result = try await api.isDone(sessionToken: token, cardCode: "PAYPAL")
+        
+        // Then
+        XCTAssertTrue(result)
+    }
     
     // MARK: - Payment Tests
     
@@ -75,6 +94,40 @@ class PaymentAPITests: BaseAPITestCase {
         // Then
         XCTAssertEqual(token, result.token)
         XCTAssertEqual("PAYMENT_SUCCESS", result.type)
+    }
+    
+    /// Tests the payment API endpoint to verify it processes a PayPal active waiting payment
+    /// and returns a ACTIVE_WAITING state with the correct token.
+    func testPaymentWithPayPalReturnsActiveWaiting() async throws {
+        // Given
+        let token = "1cEtH2D3ogZsaJ4PE1531746023359858"
+        
+        await setupMockResponse(
+            for: token,
+            endpoint: "paymentRequest",
+            jsonFileName: "ActiveWaiting"
+        )
+        
+        let params = PaymentRequest(
+            cardCode: "PAYPAL",
+            merchantReturnUrl: "https://homologation-payment.payline.com/v2?token=\(token)",
+            isEmbeddedRedirectionAllowed: true,
+            paymentParams: PaymentParams(
+                network: "",
+                expirationDate: "",
+                savePaymentData: false,
+                holderName: "",
+                applePayToken: nil
+            ),
+            contractNumber: "PAYPAL_SDK_MLD"
+        )
+        
+        // When
+        let result = try await api.payment(sessionToken: token, params: params)
+        
+        // Then
+        XCTAssertEqual(token, result.token)
+        XCTAssertEqual("ACTIVE_WAITING", result.type)
     }
     
     /// Tests the secure payment API endpoint to verify it processes a CB card payment successfully

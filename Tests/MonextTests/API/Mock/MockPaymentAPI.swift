@@ -14,6 +14,10 @@ final class MockPaymentAPI: PaymentAPIProtocol {
         throw NSError(domain: "Mock", code: -1)
     }
     
+    func isDone(sessionToken: String, cardCode: String) async throws -> Bool {
+        throw NSError(domain: "Mock", code: -1)
+    }
+    
     func payment(sessionToken: String, params: Monext.PaymentRequest) async throws -> Monext.SessionState {
         throw NSError(domain: "Mock", code: -1)
     }

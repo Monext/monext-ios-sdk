@@ -57,11 +57,14 @@ class BaseAPITestCase: XCTestCase {
         let expectedURL = "https://\(api.getEnvironment().host)/services/token/\(token)/\(endpoint)"
         
         await MockURLProtocol.setHandler({ request in
-            XCTAssertEqual(
-                request.url?.absoluteString,
-                expectedURL,
-                "Request URL should match expected endpoint"
-            )
+            if endpoint != "isDone" {
+                XCTAssertEqual(
+                    request.url?.absoluteString,
+                    expectedURL,
+                    "Request URL should match expected endpoint"
+                )
+            }
+       
             
             let response = HTTPURLResponse(
                 url: request.url!,

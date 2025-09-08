@@ -19,7 +19,13 @@ struct PaymentMethodFormContainer: View {
     var body: some View {
         ZStack {
             if paymentMethod.data?.hasForm == true {
-                AlternativePaymentMethodForm(saveCard: $viewModel.saveCard, method: paymentMethod.data)
+                AlternativePaymentMethodForm(
+                    saveCard: $viewModel.saveCard,
+                    formValid: $viewModel.formValid,
+                    formData: $viewModel.alternativeFormData,
+                    method: paymentMethod.data
+                )
+
             } else {
                 EmptyView()
             }

@@ -7,8 +7,6 @@ struct PendingScreen: View {
     
     @EnvironmentObject var sessionStore: SessionStateStore
     
-    @State private var attributedMessage: AttributedString?
-    
     private var config: Appearance { sessionStore.appearance }
     
     private var amount: String {
@@ -21,6 +19,23 @@ struct PendingScreen: View {
     
     private var localizedHTML: String? {
         sessionStore.sessionState?.paymentOnholdPartner?.message?.localizedMessage
+    }
+    
+    private var displayMessage: DisplayMessage {
+        guard let html = localizedHTML, !html.isEmpty else {
+            return .fallback
+        }
+        
+        let nodes = RichHTMLMessageParser().parse(html)
+        let builder = RichAttributedBuilder(
+            baseFont: config.fonts.semibold16,
+            baseColor: config.onBackgroundColor,
+            linkColor: config.secondaryColor,
+            underlineLinks: true,
+            addSoftWrapForLongWords: true
+        )
+        let attributedMessage = builder.build(from: nodes)
+        return .attributed(attributedMessage)
     }
     
     var body: some View {
@@ -36,23 +51,7 @@ struct PendingScreen: View {
                         .font(config.fonts.bold24)
                         .foregroundStyle(config.onBackgroundColor)
                     
-                    if let attributedMessage {
-                        Text(attributedMessage)
-                            .font(config.fonts.semibold16)
-                            .foregroundStyle(config.onBackgroundColor)
-                            .multilineTextAlignment(.leading)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .textSelection(.enabled)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    } else {
-                        Text("Your payment is pending. Please contact your merchant for further information.")
-                            .font(config.fonts.semibold16)
-                            .foregroundStyle(config.onBackgroundColor)
-                            .lineSpacing(4)
-                            .multilineTextAlignment(.leading)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
+                    messageContent
                 }
                 .padding(16)
             }
@@ -74,26 +73,42 @@ struct PendingScreen: View {
             .padding(16)
             .background(config.surfaceColor)
         }
-        .onAppear { rebuildAttributedMessage() }
-        .onChange(of: localizedHTML) { _ in rebuildAttributedMessage() }
     }
     
-    private func rebuildAttributedMessage() {
-        guard let html = localizedHTML, !html.isEmpty else {
-            attributedMessage = nil
-            return
+    // MARK: - View Components
+    
+    @ViewBuilder
+    private var messageContent: some View {
+        switch displayMessage {
+        case .attributed(let attributedMessage):
+            Text(attributedMessage)
+                .font(config.fonts.semibold16)
+                .foregroundStyle(config.onBackgroundColor)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+        case .fallback:
+            Text("Your payment is pending. Please contact your merchant for further information.")
+                .font(config.fonts.semibold16)
+                .foregroundStyle(config.onBackgroundColor)
+                .lineSpacing(4)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
-        let nodes = RichHTMLMessageParser().parse(html)
-        let builder = RichAttributedBuilder(
-            baseFont: config.fonts.semibold16,
-            baseColor: config.onBackgroundColor,
-            linkColor: config.secondaryColor,
-            underlineLinks: true,
-            addSoftWrapForLongWords: true
-        )
-        attributedMessage = builder.build(from: nodes)
     }
 }
+
+// MARK: - Supporting Types
+
+private enum DisplayMessage {
+    case attributed(AttributedString)
+    case fallback
+}
+
+// MARK: - Preview
 
 #Preview {
     PendingScreen() {}

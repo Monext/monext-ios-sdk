@@ -14,6 +14,7 @@ final class PaymentAPI: PaymentAPIProtocol {
     // MARK: - Endpoints
     private enum Endpoint {
         case stateCurrent(token: String)
+        case isDone(token: String, cardCode: String)
         case payment(token: String)
         case securePayment(token: String)
         case sdkPaymentRequest(token: String)
@@ -26,6 +27,9 @@ final class PaymentAPI: PaymentAPIProtocol {
             switch self {
             case .stateCurrent:
                 return "\(tokenPath)/state/current"
+            case .isDone(_, let cardCode):
+                let timestamp = Int(Date().timeIntervalSince1970)
+                return "\(tokenPath)/cardCode/\(cardCode)/activewaiting/isDone?timestamp=\(timestamp)"
             case .payment:
                 return "\(tokenPath)/paymentRequest"
             case .securePayment:
@@ -44,6 +48,7 @@ final class PaymentAPI: PaymentAPIProtocol {
         private var token: String {
             switch self {
             case .stateCurrent(let token),
+                 .isDone(let token, _),
                  .payment(let token),
                  .securePayment(let token),
                  .sdkPaymentRequest(let token),
@@ -88,6 +93,13 @@ final class PaymentAPI: PaymentAPIProtocol {
     public func stateCurrent(sessionToken: String) async throws -> SessionState {
         try await performRequest(
             endpoint: .stateCurrent(token: sessionToken),
+            method: .GET
+        )
+    }
+    
+    public func isDone(sessionToken: String, cardCode: String) async throws -> Bool {
+        try await performRequest(
+            endpoint: .isDone(token: sessionToken, cardCode: cardCode),
             method: .GET
         )
     }
@@ -169,10 +181,10 @@ private extension PaymentAPI {
     }
     
     private func createURL(for endpoint: Endpoint) throws -> URL {
-        var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)!
-        components.path += endpoint.path
+        let baseURLString = baseURL.absoluteString.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        let fullURLString = baseURLString + endpoint.path
         
-        guard let url = components.url else {
+        guard let url = URL(string: fullURLString) else {
             throw NetworkError.invalidURL
         }
         return url

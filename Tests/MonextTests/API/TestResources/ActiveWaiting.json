@@ -1,0 +1,49 @@
+{
+   "token":"1cEtH2D3ogZsaJ4PE1531746023359858",
+   "type":"ACTIVE_WAITING",
+   "creationDate":"Fri Sep 05 13:10:21 CEST 2025",
+   "cancelUrl":"https://yourdomain.com:8080/route/1.0/returns?paylinetoken\u003d1jemnooV8FckJixir1321757070604330",
+   "pointOfSale":"LBI_POS",
+   "language":"it",
+   "returnUrl":"https://yourdomain.com:8080/route/1.0/returns?paylinetoken\u003d1jemnooV8FckJixir1321757070604330",
+   "automaticRedirectAtSessionsEnd":false,
+   "info":{
+      "PaylineBuyerIp":"172.22.119.12",
+      "PaylineFormattedAmount":"1,00 EUR",
+      "PaylineOrderDate":"05/09/2025 13:10",
+      "PaylineOrderRef":"db2fa95a-7a4f-4b5f-9fdc-2cfab2c2a104",
+      "PaylineFormattedOrderAmount":"1,00 EUR",
+      "PaylineOrderAmountSmallestUnit":100,
+      "PaylineOrderDeliveryMode":"",
+      "PaylineAmountSmallestUnit":100,
+      "PaylineCurrencyDigits":2,
+      "PaylineMerchantCountry":"FR",
+      "PaylineOrderDetails":[
+         
+      ],
+      "PaylineOrderDeliveryTime":"",
+      "PaylineCurrencyCode":"EUR"
+   },
+   "pointOfSaleAddress":{
+      "address1":"123 rue des petits poids",
+      "address2":"",
+      "zipCode":"13100",
+      "city":"Aix en Provence"
+   },
+   "isSandbox":true,
+   "scripts":[
+      
+   ],
+   "activeWaiting":{
+      "message":{
+         "type":"CUSTOM",
+         "localizedMessage":"\u003cbr /\u003e MOCK HOMOLOGATION To emulate what happens next in the buyer’s journey, click on \u003ca style\u003d\"word-break: break-all;\" href\u003d\"https://mp8tn4c192.execute-api.eu-central-1.amazonaws.com/default/authenticator.html?payment-charge-id\u003dcharge_VzOgbTaigapWwPrdOlwTO\" target\u003d\"_blank\"\u003e https://mp8tn4c192.execute-api.eu-central-1.amazonaws.com/default/authenticator.html?payment-charge-id\u003dcharge_VzOgbTaigapWwPrdOlwTO \u003c/a\u003e",
+         "displayIcon":true
+      },
+      "needActiveWaitingAction":false,
+      "cardCode":"MBWAY_MNXT",
+      "contractNumber":"MBWAY_MONEXT",
+      "walletCardIndex":0,
+      "merchantReturnUrl":"https://webpayment.dev.payline.com/payline-widget/v2?token\u003d1jemnooV8FckJixir1321757070604330"
+   }
+}

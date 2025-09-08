@@ -233,8 +233,8 @@ class PaymentSheetTests: BaseAPITestCase {
         XCTAssertNoThrow(try view.find(SuccessScreen.self), "SuccessScreen should be displayed for PAYMENT_SUCCESS type")
     }
     
-    /// Test that PaymentSheet displays success screen when session type is PAYMENT_ONHOLD_PARTNER
-    func testPaymentSheetDisplaysSuccessScreenWhenSessionTypeIsPending() async throws {
+    /// Test that PaymentSheet displays pending  screen when session type is PAYMENT_ONHOLD_PARTNER
+    func testPaymentSheetDisplaysPendingScreenWhenSessionTypeIsPending() async throws {
         // Given: A session state store with payment success state
         let sessionStateStore = createSessionStateStore()
         
@@ -259,6 +259,34 @@ class PaymentSheetTests: BaseAPITestCase {
             expectedType: "PAYMENT_ONHOLD_PARTNER"
         )
         XCTAssertNoThrow(try view.find(PendingScreen.self), "SuccessScreen should be displayed for PAYMENT_ONHOLD_PARTNER type")
+    }
+    
+    /// Test that PaymentSheet displays success screen when session type is ACTIVE_WAITING
+    func testPaymentSheetDisplaysActiveWaitingScreenWhenSessionTypeIsActiveWaiting() async throws {
+        // Given: A session state store with payment success state
+        let sessionStateStore = createSessionStateStore()
+        
+        try await setupMockAndUpdateSession(
+            token: mockToken,
+            jsonFileName: "ActiveWaiting",
+            sessionStateStore: sessionStateStore
+        )
+        
+        let paymentSheet = createPaymentSheet(
+            token: mockToken,
+            sessionStateStore: sessionStateStore
+        )
+        
+        // When: PaymentSheet is rendered with payment success state
+        let view = try paymentSheet.inspect()
+        
+        // Then: Session state should be configured correctly and SuccessScreen should be displayed
+        verifySessionState(
+            sessionStateStore,
+            expectedToken: mockToken,
+            expectedType: "ACTIVE_WAITING"
+        )
+        XCTAssertNoThrow(try view.find(ActiveWaitingScreen.self), "SuccessScreen should be displayed for ACTIVE_WAITING type")
     }
     
     /// Test that PaymentSheet displays failure screen when session type is PAYMENT_FAILURE

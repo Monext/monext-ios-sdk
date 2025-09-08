@@ -99,6 +99,15 @@ struct PreviewData {
                 ),
                 walletCardIndex: nil
             ),
+            paymentOnholdPartner: PaymentOnholdPartner(
+                message: CustomMessage(
+                    type: "CUSTOM",
+                    localizedMessage: "<p>Hello <strong>World</strong></p>",
+                    displayIcon: true
+                ),
+                selectedCardCode: "PAYPAL_APIREST",
+                selectedContractNumber: "PAYPAL_APIREST"
+            ),
             paymentSuccess: .init(
                 displayTicket: true,
                 fragmented: false,

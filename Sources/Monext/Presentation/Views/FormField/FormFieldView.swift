@@ -27,6 +27,8 @@ struct FormFieldView: View {
     
     var onTappedInfoAccessory: (() -> Void)?
     
+    var placeholder: String? = nil
+    
     @State
     private var formattedText: String = ""
     
@@ -73,6 +75,9 @@ struct FormFieldView: View {
     }
     
     var labelBackground: Color {
+        if label.isEmpty {
+             return .clear
+         }
         if useOnSurfaceStyle {
             return config.surfaceColor
         }
@@ -106,7 +111,7 @@ struct FormFieldView: View {
                 
                 HStack {
                     
-                    TextField("", text: $formattedText)
+                    TextField(placeholder ?? "", text: $formattedText)
                         .focused(focusedState, equals: focusedField)
                         .foregroundStyle(config.textfieldTextColor)
                         .tint(config.textfieldTextColor)
@@ -170,7 +175,8 @@ struct FormFieldView: View {
             formatter: CardNumberFormatter(),
             keyboardType: .numberPad,
             focusedState: FocusState<FocusedField?>().projectedValue,
-            focusedField: .cardNumber
+            focusedField: .cardNumber,
+            placeholder: "0000 0000 0000 0000"
         )
         .padding()
         
@@ -183,7 +189,8 @@ struct FormFieldView: View {
             formatter: CardCvvFormatter(),
             keyboardType: .numberPad,
             focusedState: FocusState<FocusedField?>().projectedValue,
-            focusedField: .cvv
+            focusedField: .cvv,
+            placeholder: "123"
         )
         .padding()
         
@@ -196,8 +203,9 @@ struct FormFieldView: View {
             formatter: CardCvvFormatter(),
             keyboardType: .numberPad,
             focusedState: FocusState<FocusedField?>().projectedValue,
-            focusedField: .cvv
-        ) {}
+            focusedField: .cvv,
+            onTappedInfoAccessory: {}
+        )
         .padding()
         
         Spacer()

@@ -28,6 +28,23 @@ public extension View {
     internal func apply<V: View>(@ViewBuilder _ block: (Self) -> V) -> V { block(self) }
 }
 
+extension LocalizedStringKey {
+    func toString() -> String {
+        let mirror = Mirror(reflecting: self)
+        
+        // Essayer de récupérer la clé via réflection
+        if let key = mirror.children.first(where: { $0.label == "key" })?.value as? String {
+            return NSLocalizedString(key, comment: "")
+        }
+        
+        return ""
+    }
+    
+    var isEmpty: Bool {
+        return toString().isEmpty
+    }
+}
+
 extension Image {
     
     init(moduleImage: String) {
