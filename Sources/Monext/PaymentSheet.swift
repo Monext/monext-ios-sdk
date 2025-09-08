@@ -116,6 +116,20 @@ struct PaymentSheet: View {
                                 handleChallengeRequired(challengeParameters: sdkChallenge.challengeParameters)
                             }
                     
+                case is PaymentSheetUiState.ActiveWaiting:
+                    ActiveWaitingScreen()
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .bottom),
+                            removal: .opacity
+                        ))
+                        .onAppear {
+                            displayMode.wrappedValue = .compact
+                            Task {
+                                try? await sessionStore.isDone()
+                            }
+                        }
+                        
+                    
                 case is PaymentSheetUiState.Success:
                     SuccessScreen {
                         isPresented.toggle()
@@ -243,6 +257,9 @@ extension PaymentSheet {
                 challengeParameters: sdkChallengeData.toChallengeParameters()
             )
             
+        case SessionType.activeWaiting.rawValue:
+            return PaymentSheetUiState.ActiveWaiting()
+
         case SessionType.failure.rawValue:
             return PaymentSheetUiState.Failure()
             

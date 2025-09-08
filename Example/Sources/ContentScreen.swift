@@ -136,7 +136,7 @@ struct ContentScreen: View {
                         context: MnxtSDKContext(
                             environment: selectedEnv,
                             config: .init(
-                                language: "IT"
+                                language: "FR"
                             ),
                             appearance: appearance)
                     ) {

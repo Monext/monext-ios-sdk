@@ -52,6 +52,22 @@ final class SessionStateStore: ObservableObject {
         animateSessionStateChange(sState)
     }
     
+    func isDone() async throws {
+        guard let token = sessionState?.token,
+              let cardCode = sessionState?.activeWaiting?.cardCode else {
+            return
+        }
+        let isDone = try await paymentAPI.isDone(sessionToken: token, cardCode: cardCode)
+        if isDone {
+            try await self.updateSessionState(token: token)
+        } else {
+            try await Task.sleep(for: .seconds(3))
+            try await self.isDone()
+        }
+        
+        return;
+    }
+    
     func makeWalletPayment(params: WalletPaymentRequest) async throws {
         guard let token = sessionState?.token else { return }
         let sState = try await paymentAPI.walletPayment(sessionToken: token, params: params)
@@ -98,6 +114,7 @@ enum SessionType: String {
     case pending = "PAYMENT_ONHOLD_PARTNER"
     case success = "PAYMENT_SUCCESS"
     case sdkChallenge = "SDK_CHALLENGE"
+    case activeWaiting = "ACTIVE_WAITING"
     case failure = "PAYMENT_FAILURE"
     case canceled = "PAYMENT_CANCELED"
     case tokenExpired = "TOKEN_EXPIRED"

@@ -29,6 +29,7 @@ struct SessionState: Decodable, Equatable {
     var paymentSuccess: PaymentSuccess?
     var paymentFailure: PaymentFailure?
     var paymentSdkChallenge: PaymentSdkChallenge?
+    var activeWaiting: ActiveWaiting?
 }
 
 struct SessionInfo: Decodable, Equatable {
@@ -112,6 +113,15 @@ struct SdkChallengeData: Decodable, Equatable {
             transStatus: self.transStatus
         )
     }
+}
+
+struct ActiveWaiting: Decodable, Equatable {
+    let needActiveWaitingAction: Bool
+    let message: CustomMessage?
+    let cardCode: String
+    let contractNumber: String
+    let walletCardIndex: Int
+    let merchantReturnUrl: String
 }
 
 struct PaymentMethodsList: Decodable, Equatable {
@@ -224,6 +234,10 @@ struct PaymentMethodData: Decodable, Hashable {
         .contains(cardCode)
     }
     
+    var isSecured: Bool {
+         return form?.formFields?.contains { $0.secured == true } ?? false
+     }
+    
     static let cardGroup: [PaymentMethodData] = {
         PreviewData.paymentMethodData.filter { $0.isCard }
     }()
@@ -239,8 +253,41 @@ struct PaymentMethodData: Decodable, Hashable {
 
 struct PaymentMethodForm: Decodable, Hashable {
     var displayButton: Bool
-    var description: String
-    var buttonText: String
+    var description: String?
+    var buttonText: String?
+    var formFields: [PaymentMethodFormField]?
+    var formType: String?
+}
+struct PaymentMethodFormField: Decodable, Hashable, Identifiable {
+    var content: String?
+    var formFieldType: String?
+    var formDisplayFieldType: String?
+    var validationErrorMessage: String?
+    var placeholder: String?
+    var inputType: String?
+    var fieldIcon: String?
+    var key: String?
+    var label: String?
+    var required: Bool?
+    var requiredErrorMessage: String?
+    var formInputFieldType: String?
+    var secured: Bool?
+    var disabled: Bool?
+    var validation: PaymentMethodFieldValidation?
+
+    var index: Int? = nil
+
+    // Identifiable: privilégie `key` si présente (et supposée unique), sinon l'index.
+    // En dernier recours, on génère un UUID.
+    var id: String {
+        if let k = key, !k.isEmpty { return k }
+        if let i = index { return "index_\(i)" }
+        return UUID().uuidString
+    }
+}
+
+struct PaymentMethodFieldValidation: Decodable, Hashable {
+    var pattern: String?
 }
 
 struct PaymentMethodLogo: Decodable, Hashable {
@@ -315,12 +362,12 @@ struct RedirectionData: Decodable, Equatable {
 }
 
 struct PaymentOnholdPartner: Decodable, Equatable {
-    let message: OnholdMessage?
+    let message: CustomMessage?
     let selectedCardCode: String
     let selectedContractNumber: String
 }
 
-struct OnholdMessage: Decodable, Equatable {
+struct CustomMessage: Decodable, Equatable {
     let type: String
     let localizedMessage: String
     let displayIcon: Bool

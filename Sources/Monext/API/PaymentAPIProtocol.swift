@@ -9,6 +9,7 @@ import Foundation
 
 protocol PaymentAPIProtocol: Sendable {
     func stateCurrent(sessionToken: String) async throws -> SessionState
+    func isDone(sessionToken: String, cardCode: String) async throws -> Bool
     func payment(sessionToken: String, params: PaymentRequest) async throws -> SessionState
     func securePayment(sessionToken: String, params: SecuredPaymentRequest) async throws -> SessionState
     func sdkPaymentRequest(sessionToken: String, params: AuthenticationResponse) async throws -> SessionState

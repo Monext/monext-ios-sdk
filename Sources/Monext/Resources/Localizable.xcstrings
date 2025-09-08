@@ -49,6 +49,22 @@
         }
       }
     },
+    "Awaiting validation" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En attente de validation"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In attesa di convalida"
+          }
+        }
+      }
+    },
     "Back to the app" : {
       "localizations" : {
         "fr" : {
@@ -689,34 +705,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Votre paiement est en attente. Veuillez contacter votre commerçant pour plus d’informations."
-          }
-        }
-      }
-    },
-    "Your payment is pending. Please follow the instructions below." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Votre paiement est en attente. Veuillez suivre les instructions ci-dessous."
-          }
-        }
-      }
-    },
-    "Your payment of %@ for order %@ is pending. Please follow the instructions below." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Your payment of %1$@ for order %2$@ is pending. Please follow the instructions below."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Votre paiement de %1$@ pour la commande %2$@ est en attente. Veuillez suivre les instructions ci-dessous."
           }
         }
       }

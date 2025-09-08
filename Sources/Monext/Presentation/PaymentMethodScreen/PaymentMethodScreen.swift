@@ -46,7 +46,14 @@ struct PaymentMethodScreen: View {
             if case .cards = selectedPaymentMethod {
                 return paymentVM.formValid
             }
-            return true
+            
+            if case .alternativePaymentMethod(let paymentMethodData) = selectedPaymentMethod {
+                if let form = paymentMethodData.form, form.formType == "CUSTOM" {
+                    return paymentVM.formValid
+                }
+                // Sinon, toujours valide
+                return true
+            }
         }
         
         guard let selectedWallet else { return false }
@@ -213,13 +220,18 @@ struct PaymentMethodScreen: View {
         }
         
         Task {
-            
             paymentVM.isLoading = true
             showingOverlay = .init(cardCode: paymentMethodData.cardCode, cardNetworkName: nil)
             
             do {
                 let params = paymentVM.buildPaymentRequest(sessionToken: token, paymentMethodData: paymentMethodData)
-                try await sessionStore.makePayment(params: params)
+
+                switch params {
+                case .standard(let paymentRequest):
+                    try await sessionStore.makePayment(params: paymentRequest)
+                case .secured(let securedPaymentRequest):
+                    try await sessionStore.makeSecuredPayment(params: securedPaymentRequest)
+                }
                 
                 await MainActor.run {
                     self.paymentVM.isLoading = false

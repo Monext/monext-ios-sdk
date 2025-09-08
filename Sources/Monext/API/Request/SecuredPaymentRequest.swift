@@ -31,6 +31,7 @@ struct PaymentParams: Encodable, Equatable {
     var holderName: String = ""
     var applePayToken: ApplePayToken? = nil
     var sdkContextData: SDKContextData? = nil
+    var customFields: [String: String] = [:] // ← Ajout pour les champs dynamiques
 
     enum CodingKeys: String, CodingKey {
         case network = "NETWORK"
@@ -43,6 +44,8 @@ struct PaymentParams: Encodable, Equatable {
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        // Encoder les champs fixes
         try container.encode(network, forKey: .network)
         try container.encode(expirationDate, forKey: .expirationDate)
         try container.encode(savePaymentData, forKey: .savePaymentData)
@@ -54,9 +57,31 @@ struct PaymentParams: Encodable, Equatable {
             let jsonString = String(data: jsonData, encoding: .utf8)
             try container.encode(jsonString, forKey: .sdkContextData)
         }
+        
+        // Encoder les champs dynamiques directement dans le container principal
+        var dynamicContainer = encoder.container(keyedBy: DynamicCodingKey.self)
+        for (key, value) in customFields {
+            let dynamicKey = DynamicCodingKey(stringValue: key)!
+            try dynamicContainer.encode(value, forKey: dynamicKey)
+        }
     }
 }
 
+// Helper pour les clés dynamiques
+struct DynamicCodingKey: CodingKey {
+    var stringValue: String
+    var intValue: Int?
+
+    init?(stringValue: String) {
+        self.stringValue = stringValue
+        self.intValue = nil
+    }
+
+    init?(intValue: Int) {
+        self.stringValue = "\(intValue)"
+        self.intValue = intValue
+    }
+}
 // MARK: - Apple Pay structures
 struct ApplePayToken: Encodable, Equatable {
     let paymentData: ApplePaymentData
@@ -87,10 +112,26 @@ struct SecuredPaymentParams: Encodable, Equatable {
     
     var pan: String?
     var cvv: String?
+    var customFields: [String: String] = [:] // ← Ajout pour les champs dynamiques sécurisés
     
     enum CodingKeys: String, CodingKey {
         case pan = "PAN"
         case cvv = "CVV"
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        // Encoder les champs fixes
+        try container.encodeIfPresent(pan, forKey: .pan)
+        try container.encodeIfPresent(cvv, forKey: .cvv)
+        
+        // Encoder les champs dynamiques directement dans le container principal
+        var dynamicContainer = encoder.container(keyedBy: DynamicCodingKey.self)
+        for (key, value) in customFields {
+            let dynamicKey = DynamicCodingKey(stringValue: key)!
+            try dynamicContainer.encode(value, forKey: dynamicKey)
+        }
     }
 }
 
