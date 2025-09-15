@@ -5,7 +5,7 @@
 //  Created by Joshua Pierce on 14/11/2024.
 //
 
-struct CardNumberFormatter: FormFieldView.Formatter {
+struct CardNumberFormatter: FormFieldView<CardField>.Formatter {
     
     private static let maxLength: Int = 19
     

@@ -7,13 +7,9 @@
 
 import SwiftUI
 
-enum FocusedField: CaseIterable {
-    case cardNumber
-    case expiration
-    case cvv
-    case holder
+enum CardField: String, CaseIterable, Hashable {
+    case cardNumber, expiration, cvv, holder
 }
-
 struct CardForm: View {
     
     @StateObject var viewModel: CardFormViewModel
@@ -21,7 +17,7 @@ struct CardForm: View {
     
     @State private var isPresentedCvvInfo = false
     
-    @FocusState private var focusedField: FocusedField?
+    @FocusState private var focusedField: CardField?
     
     @EnvironmentObject var sessionStore: SessionStateStore
     @Environment(\.colorScheme) var colorScheme
@@ -30,7 +26,7 @@ struct CardForm: View {
         
         VStack(spacing: 10) {
             
-            FormFieldView(
+            FormFieldView<CardField>(
                 label: "Card number",
                 textValue: $viewModel.cardNumber,
                 errorMessage: viewModel.cardNumberError,
@@ -43,7 +39,7 @@ struct CardForm: View {
             HStack {
                 
                 if viewModel.showExpirationDate {
-                    FormFieldView(
+                    FormFieldView<CardField>(
                         label: "Expiry",
                         textValue: $viewModel.cardExpiration,
                         errorMessage: viewModel.cardExpirationError,
@@ -55,7 +51,7 @@ struct CardForm: View {
                 }
                 
                 if viewModel.showCardCvv {
-                    FormFieldView(
+                    FormFieldView<CardField>(
                         label: "CVV",
                         textValue: $viewModel.cardCvv,
                         errorMessage: viewModel.cardCvvError,
@@ -72,7 +68,7 @@ struct CardForm: View {
             }
             
             if viewModel.showCardHolderName {
-                FormFieldView(
+                FormFieldView<CardField>(
                     label: "Name on card",
                     textValue: $viewModel.cardHolderName,
                     errorMessage: viewModel.cardHolderNameError,
@@ -117,7 +113,7 @@ struct CardForm: View {
         }
         .background(sessionStore.appearance.backgroundColor)
         .toolbar {
-            if [FocusedField.cardNumber, FocusedField.expiration, FocusedField.cvv].contains(focusedField) {
+            if [CardField.cardNumber, CardField.expiration, CardField.cvv].contains(focusedField) {
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
                     Button(action: nextFocus) {

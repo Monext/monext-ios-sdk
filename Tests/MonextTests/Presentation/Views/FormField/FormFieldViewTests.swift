@@ -51,7 +51,7 @@ private struct FormFieldHost: View {
     let onInfoTap: (() -> Void)?
     let sessionStore: SessionStateStore
     
-    @FocusState private var focused: FocusedField?
+    @FocusState private var focused: String?
     
     var body: some View {
         FormFieldView(
@@ -65,7 +65,7 @@ private struct FormFieldHost: View {
             useOnSurfaceStyle: false,
             keyboardType: .numberPad,
             focusedState: $focused,
-            focusedField: .cardNumber,
+            focusedField: "PHONE_NUMBER",
             onTappedInfoAccessory: onInfoTap,
             placeholder: placeholder
         )

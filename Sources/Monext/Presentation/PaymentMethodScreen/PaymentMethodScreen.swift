@@ -15,7 +15,7 @@ struct PaymentMethodScreen: View {
     @Binding var selectedWallet: Wallet?
     @Binding var showingOverlay: LoadingOverlayData?
     
-    @FocusState private var focusedField: FocusedField?
+    @FocusState private var focusedField: CardField?
     
     @EnvironmentObject var sessionStore: SessionStateStore
     @StateObject private var paymentVM: PaymentViewModel
@@ -51,9 +51,9 @@ struct PaymentMethodScreen: View {
                 if let form = paymentMethodData.form, form.formType == "CUSTOM" {
                     return paymentVM.formValid
                 }
-                // Sinon, toujours valide
-                return true
             }
+            
+            return true
         }
         
         guard let selectedWallet else { return false }

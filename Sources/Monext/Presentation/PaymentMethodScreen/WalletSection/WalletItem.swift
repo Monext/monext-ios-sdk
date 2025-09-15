@@ -13,7 +13,7 @@ struct WalletItem: View {
     
     var isSelected: Bool
     
-    let focusedField: FocusState<FocusedField?>.Binding
+    let focusedField: FocusState<CardField?>.Binding
     
     @Binding var cvv: String
     
@@ -133,7 +133,7 @@ struct WalletItem: View {
                 )
                 .modifier(CvvInfoDialog(isPresented: $isPresentedCvvInfo))
                 .toolbar {
-                    if focusedField.wrappedValue == FocusedField.cvv {
+                    if focusedField.wrappedValue == CardField.cvv {
                         ToolbarItemGroup(placement: .keyboard) {
                             Spacer()
                             Button(action: { focusedField.wrappedValue = nil }) {
@@ -173,7 +173,7 @@ struct WalletItem: View {
         WalletItem(
             wallet: PreviewData.wallets.first!,
             isSelected: true,
-            focusedField: FocusState<FocusedField?>().projectedValue,
+            focusedField: FocusState<CardField?>().projectedValue,
             cvv: .constant("")
         )
         
@@ -182,7 +182,7 @@ struct WalletItem: View {
         WalletItem(
             wallet: PreviewData.wallets[1],
             isSelected: false,
-            focusedField: FocusState<FocusedField?>().projectedValue,
+            focusedField: FocusState<CardField?>().projectedValue,
             cvv: .constant("")
         )
         
@@ -191,7 +191,7 @@ struct WalletItem: View {
         WalletItem(
             wallet: PreviewData.wallets[3],
             isSelected: false,
-            focusedField: FocusState<FocusedField?>().projectedValue,
+            focusedField: FocusState<CardField?>().projectedValue,
             cvv: .constant("")
         )
         
