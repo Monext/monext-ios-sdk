@@ -36,6 +36,7 @@ struct SessionInfo: Decodable, Equatable {
     
     var amountSmallestUnit: Int64
     var buyerIp: String?
+    var buyerMobilePhone: String?
     var currencyCode: String
     var currencyDigits: Int
     var formattedAmount: String
@@ -50,6 +51,7 @@ struct SessionInfo: Decodable, Equatable {
     enum CodingKeys: String, CodingKey {
         case amountSmallestUnit = "PaylineAmountSmallestUnit"
         case buyerIp = "PaylineBuyerIp"
+        case buyerMobilePhone = "PaylineBuyerMobilePhone"
         case currencyCode = "PaylineCurrencyCode"
         case currencyDigits = "PaylineCurrencyDigits"
         case formattedAmount = "PaylineFormattedAmount"

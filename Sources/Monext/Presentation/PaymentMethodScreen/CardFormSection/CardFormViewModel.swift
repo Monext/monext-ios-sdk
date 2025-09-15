@@ -81,7 +81,7 @@ final class CardFormViewModel: ObservableObject {
     @Published var cardHolderName: String = ""
     @Published var cardHolderNameError: LocalizedStringKey?
     
-    @Published var focusedField: FocusedField?
+    @Published var focusedField: CardField?
     
     @Published internal var issuer: Issuer?
     
@@ -127,7 +127,7 @@ final class CardFormViewModel: ObservableObject {
             .store(in: &subscribers)
     }
     
-    func nextFocus(_ focusedField: FocusedField) -> FocusedField? {
+    func nextFocus(_ focusedField: CardField) -> CardField? {
         switch focusedField {
         case .cardNumber:
             if showExpirationDate { return .expiration }

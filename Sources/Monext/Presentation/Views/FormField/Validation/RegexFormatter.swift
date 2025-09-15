@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct RegexFormatter: FormFieldView.Formatter {
+struct RegexFormatter: FormFieldView<String>.Formatter {
         
     private let maxLength: Int?
     private let requiresFullMatch: Bool

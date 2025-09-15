@@ -22,12 +22,13 @@ struct AlternativePaymentMethodForm: View {
     }
 
     @State private var fieldValues: [String: String] = [:]
-    @State private var touchedFields: Set<String> = [] // ← Ajout pour tracker les champs touchés
-    @FocusState private var focusedField: FocusedField?
+    @State private var touchedFields: Set<String> = []
+    @FocusState private var focusedField: String?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             if method.hasForm == true, let form = method.form {
+                
                 switch form.formType {
                 case "CUSTOM":
                     if let fields = form.formFields {
@@ -52,18 +53,9 @@ struct AlternativePaymentMethodForm: View {
             validateForm()
             formData = getFormDataWithKeys()
         }
-        .onChange(of: focusedField) { newFocus in
-            // Marquer le champ comme touché quand il perd le focus
-            if let previousField = focusedField {
-                // Trouver l'ID du champ qui vient de perdre le focus
-                if let form = method.form, let fields = form.formFields {
-                    for field in fields where field.formFieldType == "INPUT" {
-                        touchedFields.insert(field.id)
-                    }
-                }
-            }
-        }
         .onAppear {
+            let prefilled = getPreFilledFieldValues()
+            fieldValues = prefilled
             validateForm()
             formData = getFormDataWithKeys()
         }
@@ -85,14 +77,16 @@ struct AlternativePaymentMethodForm: View {
                     get: { fieldValues[field.id] ?? "" },
                     set: {
                         fieldValues[field.id] = $0
-                        touchedFields.insert(field.id)
+                        if !$0.isEmpty || $0 == "" {
+                            touchedFields.insert(field.id)
+                        }
                     }
                 ),
                 errorMessage: getErrorMessage(for: field),
                 formatter: getFormatter(for: field),
                 keyboardType: getKeyboardType(for: field),
                 focusedState: $focusedField,
-                focusedField: .holder,
+                focusedField: field.id,
                 placeholder: field.placeholder
             )
             .padding(.vertical, 8)
@@ -103,11 +97,35 @@ struct AlternativePaymentMethodForm: View {
     
     // MARK: - Helper Methods
     
-    private func getFormatter(for field: PaymentMethodFormField) -> (any FormFieldView.Formatter)? {
+    private func getPreFilledFieldValues() -> [String: String] {
+        guard let form = method.form, let fields = form.formFields else {
+            return [:]
+        }
+        var result: [String: String] = [:]
+        for field in fields {
+            if field.formFieldType == "INPUT" {
+                if field.inputType == "TEL",
+                    let phone = sessionStore.sessionState?.info?.buyerMobilePhone, !phone.isEmpty {
+                    if let pattern = field.validation?.pattern {
+                        let formatter = RegexFormatter(pattern: pattern)
+                        if formatter.isValid(phone) {
+                            result[field.id] = phone
+                            touchedFields.insert(field.id)
+                        }
+                    } else {
+                        result[field.id] = phone
+                        touchedFields.insert(field.id)
+                    }
+                }
+            }
+        }
+        return result
+    }
+    
+    private func getFormatter(for field: PaymentMethodFormField) -> (any FormFieldView<String>.Formatter)? {
         guard let pattern = field.validation?.pattern else {
             return nil
         }
-        
         return RegexFormatter(pattern: pattern)
     }
     
@@ -135,25 +153,25 @@ struct AlternativePaymentMethodForm: View {
     private func getErrorMessage(for field: PaymentMethodFormField) -> LocalizedStringKey? {
         let fieldId = field.id
         let currentValue = fieldValues[fieldId] ?? ""
-        
+
         // Ne pas afficher d'erreurs si le champ n'a pas été touché
         guard touchedFields.contains(fieldId) else {
             return nil
         }
-        
-        // Vérifier si le champ est requis et vide
-        if field.required == true && currentValue.isEmpty {
-            return LocalizedStringKey(field.requiredErrorMessage ?? "Ce champ est requis")
+
+        // Ne pas afficher d'erreur tant que le champ est vide
+        if currentValue.isEmpty {
+            return nil
         }
-        
+
         // Vérifier la validation si le champ n'est pas vide et qu'il y a une validation
-        if !currentValue.isEmpty, let pattern = field.validation?.pattern {
+        if let pattern = field.validation?.pattern {
             let formatter = RegexFormatter(pattern: pattern)
             if !formatter.isValid(currentValue) {
                 return LocalizedStringKey(field.validationErrorMessage ?? "Format invalide")
             }
         }
-        
+
         return nil
     }
     

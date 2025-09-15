@@ -8,7 +8,7 @@
 import SwiftUI
 import UIKit
 
-struct FormFieldView: View {
+struct FormFieldView<ID: Hashable>: View {
     
     let label: LocalizedStringKey
     
@@ -22,8 +22,8 @@ struct FormFieldView: View {
     
     var keyboardType: UIKeyboardType = .default
     
-    var focusedState: FocusState<FocusedField?>.Binding
-    let focusedField: FocusedField
+    var focusedState: FocusState<ID?>.Binding
+    let focusedField: ID?
     
     var onTappedInfoAccessory: (() -> Void)?
     
@@ -153,9 +153,24 @@ struct FormFieldView: View {
                 }
             }
         }
+        // --- Synchronisation dans les deux sens ---
+        .onAppear {
+            // Synchronise au premier affichage (préremplissage, navigation, etc.)
+            formattedText = formatter?.format(textValue) ?? textValue
+        }
+        .onChange(of: textValue) { newRaw in
+            // Synchronise quand textValue change de l'extérieur (préremplissage, reset, etc.)
+            let newFormatted = formatter?.format(newRaw) ?? newRaw
+            if formattedText != newFormatted {
+                formattedText = newFormatted
+            }
+        }
         .onChange(of: formattedText) { changedText in
-            formattedText = formatter?.format(changedText) ?? changedText
-            textValue = formatter?.preformattedRawValue(changedText) ?? changedText
+            // Synchronise la valeur brute à chaque saisie utilisateur
+            let rawValue = formatter?.preformattedRawValue(changedText) ?? changedText
+            if textValue != rawValue {
+                textValue = rawValue
+            }
         }
     }
 }
@@ -168,13 +183,13 @@ struct FormFieldView: View {
         
         Spacer()
         
-        FormFieldView(
+        FormFieldView<CardField>(
             label: "Card Number",
             textValue: .constant(""),
             errorMessage: nil,
             formatter: CardNumberFormatter(),
             keyboardType: .numberPad,
-            focusedState: FocusState<FocusedField?>().projectedValue,
+            focusedState: FocusState<CardField?>().projectedValue,
             focusedField: .cardNumber,
             placeholder: "0000 0000 0000 0000"
         )
@@ -182,13 +197,13 @@ struct FormFieldView: View {
         
         Spacer()
         
-        FormFieldView(
+        FormFieldView<CardField>(
             label: "CVV",
             textValue: .constant(""),
             errorMessage: "An error occurred!",
             formatter: CardCvvFormatter(),
             keyboardType: .numberPad,
-            focusedState: FocusState<FocusedField?>().projectedValue,
+            focusedState: FocusState<CardField?>().projectedValue,
             focusedField: .cvv,
             placeholder: "123"
         )
@@ -196,13 +211,13 @@ struct FormFieldView: View {
         
         Spacer()
         
-        FormFieldView(
+        FormFieldView<CardField>(
             label: "CVV",
             textValue: .constant(""),
             errorMessage: nil,
             formatter: CardCvvFormatter(),
             keyboardType: .numberPad,
-            focusedState: FocusState<FocusedField?>().projectedValue,
+            focusedState: FocusState<CardField?>().projectedValue,
             focusedField: .cvv,
             onTappedInfoAccessory: {}
         )

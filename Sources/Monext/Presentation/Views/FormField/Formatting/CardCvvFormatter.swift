@@ -5,7 +5,7 @@
 //  Created by Joshua Pierce on 14/11/2024.
 //
 
-struct CardCvvFormatter: FormFieldView.Formatter {
+struct CardCvvFormatter: FormFieldView<CardField>.Formatter {
     
     func preformattedRawValue(_ value: String) -> String {
         value.restrictToNumericInput()

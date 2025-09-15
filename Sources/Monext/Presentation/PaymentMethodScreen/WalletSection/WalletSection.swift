@@ -14,7 +14,7 @@ struct WalletSection: View {
     @Binding var selectedWallet: Wallet?
     @Binding var walletCvv: String
     
-    var focusedField: FocusState<FocusedField?>.Binding
+    var focusedField: FocusState<CardField?>.Binding
     
     @EnvironmentObject var sessionStore: SessionStateStore
     
@@ -113,7 +113,7 @@ struct WalletSection: View {
             wallets: PreviewData.wallets,
             selectedWallet: .constant(nil),
             walletCvv: .constant(""),
-            focusedField: FocusState<FocusedField?>().projectedValue
+            focusedField: FocusState<CardField?>().projectedValue
         )
         
         Spacer()
@@ -122,7 +122,7 @@ struct WalletSection: View {
             wallets: PreviewData.wallets,
             selectedWallet: .constant(PreviewData.wallets.first!),
             walletCvv: .constant(""),
-            focusedField: FocusState<FocusedField?>().projectedValue
+            focusedField: FocusState<CardField?>().projectedValue
         )
         
         Spacer()
