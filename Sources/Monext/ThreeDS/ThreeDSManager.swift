@@ -62,12 +62,16 @@ class ThreeDS2Manager: ObservableObject {
     func getSchemeForCardCode(_ cardNetworkName: String) throws -> Scheme {
         switch cardNetworkName {
         case "CB":
+            directoryServerId = DsRidValues.cartesBancaires
             return Scheme.cb()
         case "VISA":
+            directoryServerId = DsRidValues.visa
             return Scheme.visa()
         case "MASTERCARD":
+            directoryServerId = DsRidValues.mastercard
             return Scheme.mastercard()
         case "AMEX":
+            directoryServerId = DsRidValues.amex
             return Scheme.amex()
         default:
             throw SchemeError.unsupportedCardCode(cardNetworkName)
@@ -91,7 +95,6 @@ class ThreeDS2Manager: ObservableObject {
             }
         } else {
             let scheme = try getSchemeForCardCode(cardNetworkName)
-            directoryServerId = scheme.ids?.first ?? nil
             return scheme
         }
     }
