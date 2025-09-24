@@ -71,3 +71,5 @@ sonarqube-generic-coverage.xml
 
 
 Example/Config/Secrets.xcconfig
+Sources/Monext/AppMetadata.plist
+Example/fastlane/report.xml
