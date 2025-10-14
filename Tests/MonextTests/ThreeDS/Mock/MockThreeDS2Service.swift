@@ -10,15 +10,44 @@ import Foundation
 @testable import Monext
 
 class MockThreeDS2Service: NSObject, ThreeDS2Service, @unchecked Sendable {
-    var didInitialize = false
-    var transactionToReturn: ThreeDS_SDK.Transaction = MockTransaction()
-    var warningsToReturn: [ThreeDS_SDK.Warning] = []
+    private let accessQueue = DispatchQueue(label: "com.monext.MockThreeDS2Service.accessQueue", attributes: .concurrent)
+    
+    private var _didInitialize = false
+    private var _transactionToReturn: ThreeDS_SDK.Transaction = MockTransaction()
+    private var _warningsToReturn: [ThreeDS_SDK.Warning] = []
     
     // Configuration du mock
-    var shouldSucceed = true
-    var errorToThrow: Error?
-    var useAsyncBehavior = false
-    var initializationDelay: TimeInterval = 0.1
+    private var shouldSucceed = true
+    private var errorToThrow: Error?
+    private var useAsyncBehavior = false
+    private var initializationDelay: TimeInterval = 0.1
+    
+    var didInitialize: Bool {
+        get {
+            accessQueue.sync { _didInitialize }
+        }
+        set {
+            accessQueue.async(flags: .barrier) { self._didInitialize = newValue }
+        }
+    }
+    
+    var transactionToReturn: ThreeDS_SDK.Transaction {
+        get {
+            accessQueue.sync { _transactionToReturn }
+        }
+        set {
+            accessQueue.async(flags: .barrier) { self._transactionToReturn = newValue }
+        }
+    }
+    
+    var warningsToReturn: [ThreeDS_SDK.Warning] {
+        get {
+            accessQueue.sync { _warningsToReturn }
+        }
+        set {
+            accessQueue.async(flags: .barrier) { self._warningsToReturn = newValue }
+        }
+    }
     
     func initialize(_ configParameters: ConfigParameters, locale: String?, uiCustomization: ThreeDS_SDK.UiCustomization?) throws {
         didInitialize = true
@@ -29,30 +58,33 @@ class MockThreeDS2Service: NSObject, ThreeDS2Service, @unchecked Sendable {
     }
     
     func initialize(_ configParameters: ConfigParameters, locale: String?, uiCustomizationMap: [String : ThreeDS_SDK.UiCustomization]?, success: @escaping @Sendable () -> (), failure: @escaping @Sendable (any Error) -> ()) {
-        print("Mock initialize called")
         if useAsyncBehavior {
-            DispatchQueue.main.asyncAfter(deadline: .now() + initializationDelay) { [weak self] in
+            DispatchQueue.global().asyncAfter(deadline: .now() + initializationDelay) { [weak self] in
                 guard let self = self else { return }
                 
                 if self.shouldSucceed {
-                    print("Mock initialization succeeded asynchronously")
                     self.didInitialize = true
-                    success()
+                    DispatchQueue.main.async {
+                        success()
+                    }
                 } else {
-                    let error = self.errorToThrow ?? NSError(domain: "MockError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Mock initialization failed"])
-                    print("Mock initialization failed asynchronously")
-                    failure(error)
+                    let error = self.errorToThrow ?? NSError(domain: "MockError", code: 1, userInfo: nil)
+                    DispatchQueue.main.async {
+                        failure(error)
+                    }
                 }
             }
         } else {
             if shouldSucceed {
-                print("Mock initialization succeeded synchronously")
                 didInitialize = true
-                success()
+                DispatchQueue.main.async {
+                    success()
+                }
             } else {
-                let error = errorToThrow ?? NSError(domain: "MockError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Mock initialization failed"])
-                print("Mock initialization failed synchronously")
-                failure(error)
+                let error = errorToThrow ?? NSError(domain: "MockError", code: 1, userInfo: nil)
+                DispatchQueue.main.async {
+                    failure(error)
+                }
             }
         }
     }
@@ -84,25 +116,31 @@ class MockThreeDS2Service: NSObject, ThreeDS2Service, @unchecked Sendable {
     // MARK: - Configuration Methods for Testing
     
     func configureForSuccess(delay: TimeInterval = 0.1, async: Bool = false) {
-        shouldSucceed = true
-        initializationDelay = delay
-        errorToThrow = nil
-        useAsyncBehavior = async
+        accessQueue.async(flags: .barrier) {
+            self.shouldSucceed = true
+            self.initializationDelay = delay
+            self.errorToThrow = nil
+            self.useAsyncBehavior = async
+        }
     }
     
     func configureForFailure(error: Error, delay: TimeInterval = 0.1, async: Bool = false) {
-        shouldSucceed = false
-        errorToThrow = error
-        initializationDelay = delay
-        useAsyncBehavior = async
+        accessQueue.async(flags: .barrier) {
+            self.shouldSucceed = false
+            self.errorToThrow = error
+            self.initializationDelay = delay
+            self.useAsyncBehavior = async
+        }
     }
     
     func reset() {
-        didInitialize = false
-        shouldSucceed = true
-        errorToThrow = nil
-        initializationDelay = 0.1
-        warningsToReturn = []
-        useAsyncBehavior = false
+        accessQueue.async(flags: .barrier) {
+            self._didInitialize = false
+            self.shouldSucceed = true
+            self.errorToThrow = nil
+            self.initializationDelay = 0.1
+            self._warningsToReturn = []
+            self.useAsyncBehavior = false
+        }
     }
 }
