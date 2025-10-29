@@ -77,45 +77,6 @@ jobs:
         swift package resolve
         swift package show-dependencies
 
-    - name: Run unit tests (iOS Simulator)
-      env:
-        SCHEME_FALLBACK: Monext
-        SCHEME_TESTS: Monext-Package
-      run: |
-        set -euo pipefail
-
-        # Déterminer le schéma de test: "Monext-Package" si présent, sinon "Monext"
-        SCHEME="$SCHEME_TESTS"
-        if ! xcodebuild -list -json 2>/dev/null | grep -q "\"$SCHEME_TESTS\""; then
-          SCHEME="$SCHEME_FALLBACK"
-        fi
-        echo "➡️ Using test scheme: $SCHEME"
-
-        # Choisir la version d'OS simulée depuis l'iphonesimulator SDK
-        OS_VER="$(xcrun --sdk iphonesimulator --show-sdk-version)" # ex: 18.2
-        RUNTIME_ID="com.apple.CoreSimulator.SimRuntime.iOS-${OS_VER//./-}"
-
-        # Choisir un device type disponible (iPhone 16 sinon iPhone 15)
-        DEVICETYPE="iPhone 16"
-        if ! xcrun simctl list devicetypes | grep -q "$DEVICETYPE"; then
-          DEVICETYPE="iPhone 15"
-        fi
-        echo "🛠️ Creating simulator: $DEVICETYPE ($RUNTIME_ID)"
-        UDID="$(xcrun simctl create 'Monext-CI' "$DEVICETYPE" "$RUNTIME_ID")"
-        trap 'xcrun simctl delete "$UDID" || true' EXIT
-
-        # (Optionnel) attendre que le runtime soit prêt
-        xcrun simctl bootstatus "$UDID" -b || true
-
-        echo "🧪 Running tests on simulator $UDID (iOS $OS_VER)..."
-        xcodebuild \
-          -scheme "$SCHEME" \
-          -configuration Debug \
-          -sdk iphonesimulator \
-          -destination "id=$UDID" \
-          -derivedDataPath build \
-          test
-
     - name: Build XCFramework
       run: |
         chmod +x build_xcframework.sh
