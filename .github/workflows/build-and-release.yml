@@ -46,15 +46,23 @@ jobs:
 
     - name: Check if release should be created
       id: check-release
-      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
       run: |
         VERSION="${{ steps.get-version.outputs.version }}"
-        if git rev-parse "v$VERSION" >/dev/null 2>&1; then
-          echo "should-release=false" >> $GITHUB_OUTPUT
-          echo "🏷️ Tag v$VERSION existe déjà, pas de release"
+        
+        # Vérifier si on est sur master/main
+        if [[ "${{ github.ref }}" == "refs/heads/master" ]] || [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+          # Vérifier si le tag existe déjà
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            echo "should-release=false" >> $GITHUB_OUTPUT
+            echo "🏷️ Tag v$VERSION existe déjà, pas de release"
+          else
+            echo "should-release=true" >> $GITHUB_OUTPUT
+            echo "✨ Nouvelle version détectée: v$VERSION"
+          fi
         else
-          echo "should-release=true" >> $GITHUB_OUTPUT
-          echo "✨ Nouvelle version détectée: v$VERSION"
+          # Pas sur master/main (PR ou autre branche)
+          echo "should-release=false" >> $GITHUB_OUTPUT
+          echo "🔧 Branche: ${{ github.ref_name }}, pas de release"
         fi
 
     - name: Configure API Key
@@ -91,7 +99,7 @@ jobs:
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: monext-build-${{ steps.get-version.outputs.version }}
+        name: monext-build-${{ steps.get-version.outputs.version }}-${{ github.run_number }}
         path: |
           dist/Monext.xcframework
           Monext-${{ steps.get-version.outputs.version }}.zip
@@ -111,7 +119,7 @@ jobs:
     - name: Download build artifacts
       uses: actions/download-artifact@v4
       with:
-        name: monext-build-${{ needs.build.outputs.version }}
+        name: monext-build-${{ needs.build.outputs.version }}-${{ github.run_number }}
 
     - name: Generate Release Notes
       id: release-notes
@@ -136,15 +144,15 @@ jobs:
         ### Swift Package Manager
         
         1. **Add the Package Dependency:**  
-           Follow Apple’s guide on [Adding Package Dependencies to Your App](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app).
+           Follow Apple's guide on [Adding Package Dependencies to Your App](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app).
         
         2. **Enter the Repository URL:**
-           ```
+           \`\`\`
            https://github.com/Monext/monext-ios-sdk
-           ```  
+           \`\`\`  
         
         3. **Specify the Version:**  
-           Use version `$VERSION` or later.
+           Use version \`$VERSION\` or later.
 
         ### 📦 Contenu de la release
         - Monext.xcframework
@@ -175,46 +183,179 @@ jobs:
     if: always()
 
     steps:
-    - name: Notify Success
-      if: needs.release.result == 'success'
-      env:
+      - name: Notify Build Status
+        env:
           TEAMS_WEBHOOK_URL: ${{ secrets.URL_WEBHOOK_TEAMS }}
-      run: |
-        VERSION="${{ needs.build.outputs.version }}"
-        echo "✅ Release v${VERSION} créée avec succès!"
-        echo "🔗 https://github.com/${{ github.repository }}/releases/tag/v${{ needs.build.outputs.version }}"
-        cat > teams-release-notification.json <<EOF
-        {
-            "type": "AdaptiveCard",
-            "body": [
-                {
-                    "type": "TextBlock",
-                    "size": "Medium",
-                    "weight": "Bolder",
-                    "text": "Nouvelle Release Publiée ! (SDK iOS) "
-                },
-                {
-                    "type": "TextBlock",
-                    "text": "Version v${VERSION}",
-                    "wrap": true
+        run: |
+          VERSION="${{ needs.build.outputs.version }}"
+          BUILD_RESULT="${{ needs.build.result }}"
+          RELEASE_RESULT="${{ needs.release.result }}"
+          BRANCH="${{ github.ref_name }}"
+          SHOULD_RELEASE="${{ needs.build.outputs.should-release }}"
+          
+          # Déterminer le statut global
+          if [[ "$BUILD_RESULT" == "failure" ]]; then
+            OVERALL_STATUS="failure"
+            NOTIFICATION_TYPE="Build"
+          elif [[ "$RELEASE_RESULT" == "failure" ]]; then
+            OVERALL_STATUS="failure"
+            NOTIFICATION_TYPE="Release"
+          elif [[ "$RELEASE_RESULT" == "success" ]]; then
+            OVERALL_STATUS="success"
+            NOTIFICATION_TYPE="Release"
+          elif [[ "$BUILD_RESULT" == "success" ]] && [[ "$SHOULD_RELEASE" == "false" ]]; then
+            OVERALL_STATUS="success"
+            NOTIFICATION_TYPE="Build (sans release)"
+          else
+            OVERALL_STATUS="unknown"
+            NOTIFICATION_TYPE="Build"
+          fi
+          
+          # Configuration selon le statut
+          if [[ "$OVERALL_STATUS" == "success" ]]; then
+            ICON_COLOR="Good"
+            ICON="CheckmarkStarburst"
+            STATUS_TEXT="✅ Success"
+            
+            if [[ "$RELEASE_RESULT" == "success" ]]; then
+              EXTRA_MESSAGE="Publication sur Github Releases réussie."
+              RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/v${VERSION}"
+              RELEASE_ACTION="{
+                \"type\": \"Action.OpenUrl\",
+                \"title\": \"🚀 Voir la release\",
+                \"url\": \"${RELEASE_URL}\"
+              },"
+              echo "✅ Release v${VERSION} créée avec succès!"
+              echo "🔗 ${RELEASE_URL}"
+            else
+              EXTRA_MESSAGE="Build réussi sur la branche ${BRANCH} (pas de release créée)."
+              RELEASE_ACTION=""
+              echo "✅ Build v${VERSION} réussi sur ${BRANCH} (should-release: ${SHOULD_RELEASE})"
+            fi
+          elif [[ "$OVERALL_STATUS" == "failure" ]]; then
+            ICON_COLOR="Attention"
+            ICON="DismissCircle"
+            STATUS_TEXT="❌ Échec"
+            EXTRA_MESSAGE="Échec lors du processus de ${NOTIFICATION_TYPE}."
+            RELEASE_ACTION=""
+            
+            echo "❌ Échec du ${NOTIFICATION_TYPE}"
+          else
+            ICON_COLOR="Warning"
+            ICON="Warning"
+            STATUS_TEXT="⚠️ Statut inconnu"
+            EXTRA_MESSAGE="Le statut du workflow est indéterminé."
+            RELEASE_ACTION=""
+            
+            echo "⚠️ Statut inconnu"
+          fi
+          
+          # Envoi de la notification Teams
+          curl -X POST "${TEAMS_WEBHOOK_URL}" \
+            -H "Content-Type: application/json" \
+            -d @- << EOF
+          {
+            "type": "message",
+            "attachments": [
+              {
+                "contentType": "application/vnd.microsoft.card.adaptive",
+                "contentUrl": null,
+                "content": {
+                  "type": "AdaptiveCard",
+                  "\$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                  "version": "1.4",
+                  "body": [
+                    {
+                      "type": "ColumnSet",
+                      "columns": [
+                        {
+                          "type": "Column",
+                          "width": "auto",
+                          "height": "stretch",
+                          "items": [
+                            {
+                              "type": "Icon",
+                              "name": "${ICON}",
+                              "style": "Filled",
+                              "color": "${ICON_COLOR}"
+                            }
+                          ],
+                          "spacing": "None"
+                        },
+                        {
+                          "type": "Column",
+                          "width": "stretch",
+                          "items": [
+                            {
+                              "type": "TextBlock",
+                              "text": "Publication **SDK iOS** - ${STATUS_TEXT}",
+                              "wrap": true,
+                              "size": "Large",
+                              "weight": "Bolder"
+                            }
+                          ],
+                          "spacing": "Small"
+                        }
+                      ],
+                      "spacing": "None"
+                    },
+                    {
+                      "type": "TextBlock",
+                      "text": "_version ${VERSION}_",
+                      "wrap": true,
+                      "isSubtle": true,
+                      "spacing": "Small"
+                    },
+                    {
+                      "type": "FactSet",
+                      "facts": [
+                        {
+                          "title": "Repository:",
+                          "value": "${{ github.repository }}"
+                        },
+                        {
+                          "title": "Branch/Tag:",
+                          "value": "${BRANCH}"
+                        },
+                        {
+                          "title": "Auteur:",
+                          "value": "${{ github.actor }}"
+                        },
+                        {
+                          "title": "Build Status:",
+                          "value": "${BUILD_RESULT}"
+                        },
+                        {
+                          "title": "Release Status:",
+                          "value": "${RELEASE_RESULT}"
+                        }
+                      ],
+                      "separator": true
+                    },
+                    {
+                      "type": "TextBlock",
+                      "text": "${EXTRA_MESSAGE}",
+                      "wrap": true,
+                      "separator": true
+                    }
+                  ],
+                  "actions": [
+                    ${RELEASE_ACTION}
+                    {
+                      "type": "Action.OpenUrl",
+                      "title": "📊 Voir le build",
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
                 }
-            ],
-            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-            "version": "1.5",
-            "actions": [
-                {
-                    "type": "Action.OpenUrl",
-                    "title": "Voir la Release",
-                    "url": "https://github.com/Monext/monext-ios-sdk/releases/tag/v${VERSION}"
-                }
+              }
             ]
-        }
-        EOF
-        curl -H "Content-Type: application/json" -d @teams-release-notification.json "$TEAMS_WEBHOOK_URL"
-        
-
-    - name: Notify Failure
-      if: needs.build.result == 'failure' || needs.release.result == 'failure'
-      run: |
-        echo "❌ Échec du build ou de la release"
-        exit 1
+          }
+          EOF
+          
+          echo "✅ Notification ${NOTIFICATION_TYPE} (${OVERALL_STATUS}) envoyée avec succès"
+          
+          # Faire échouer le step si le statut global est en échec
+          if [[ "$OVERALL_STATUS" == "failure" ]]; then
+            exit 1
+          fi
