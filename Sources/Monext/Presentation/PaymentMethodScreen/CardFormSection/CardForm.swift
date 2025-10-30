@@ -8,8 +8,9 @@
 import SwiftUI
 
 enum CardField: String, CaseIterable, Hashable {
-    case cardNumber, expiration, cvv, holder
+    case cardNumber, expiration, cvv, holder, networkSelector
 }
+
 struct CardForm: View {
     
     @StateObject var viewModel: CardFormViewModel
@@ -21,6 +22,8 @@ struct CardForm: View {
     
     @EnvironmentObject var sessionStore: SessionStateStore
     @Environment(\.colorScheme) var colorScheme
+    
+    var onFieldFocused: ((CardField?) -> Void)?
     
     var body: some View {
         
@@ -35,6 +38,7 @@ struct CardForm: View {
                 focusedState: $focusedField,
                 focusedField: .cardNumber
             )
+            .id(CardField.cardNumber)
             
             HStack {
                 
@@ -48,6 +52,7 @@ struct CardForm: View {
                         focusedState: $focusedField,
                         focusedField: .expiration
                     )
+                    .id(CardField.expiration)
                 }
                 
                 if viewModel.showCardCvv {
@@ -63,6 +68,7 @@ struct CardForm: View {
                             isPresentedCvvInfo = true
                         }
                     )
+                    .id(CardField.cvv)
                     .modifier(CvvInfoDialog(isPresented: $isPresentedCvvInfo))
                 }
             }
@@ -76,6 +82,7 @@ struct CardForm: View {
                     focusedState: $focusedField,
                     focusedField: .holder
                 )
+                .id(CardField.holder)
                 .onSubmit {
                     focusedField = nil
                 }
@@ -123,9 +130,9 @@ struct CardForm: View {
                 }
             }
         }
-        .scrollDismissesKeyboard(.interactively)
         .onChange(of: focusedField) { field in
             viewModel.focusedField = field
+            onFieldFocused?(field)
         }
         .onChange(of: viewModel.saveCard) { _ in
             focusedField = nil
