@@ -38,20 +38,33 @@ struct CardFormContainer: View {
     var displayMode
     
     var body: some View {
-        ScrollView {
-            
-            VStack(spacing: 16) {
-                
-                AcceptedCardsList(paymentMethods: cardsPaymentMethodData)
-                
-                if let formViewModel = viewModel.cardFormViewModel {
-                    CardForm(
-                        viewModel: formViewModel,
-                        formValid: $formValid
-                    )
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(spacing: 16) {
+
+                    AcceptedCardsList(paymentMethods: cardsPaymentMethodData)
+                    
+                    if let formViewModel = viewModel.cardFormViewModel {
+                        CardForm(
+                            viewModel: formViewModel,
+                            formValid: $formValid,
+                            onFieldFocused: { field in
+                                if let field = field {
+                                    // Scroll avec un léger délai pour laisser le clavier apparaître
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                                        withAnimation(.easeInOut(duration: 0.05)) {
+                                            // Utiliser UnitPoint pour positionner exactement en haut
+                                            proxy.scrollTo(field, anchor: UnitPoint(x: 0, y: 0))
+                                        }
+                                    }
+                                }
+                            }
+                        )
+                    }
                 }
+                .padding(16)
             }
-            .padding(16)
+            .scrollDismissesKeyboard(.interactively)
         }
         .background(sessionStore.appearance.backgroundColor)
         .transition(.move(edge: .bottom))

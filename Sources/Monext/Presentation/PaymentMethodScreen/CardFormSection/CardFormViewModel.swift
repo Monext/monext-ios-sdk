@@ -43,12 +43,16 @@ final class CardFormViewModel: ObservableObject {
     }
     
     var showExpirationDate: Bool {
-        guard derivedPaymentMethod != nil else { return true }
+        if derivedPaymentMethod == nil {
+            return knownOptionsSet.contains(.expirationDate)
+        }
         return hasPaymentOption(key: .expirationDate)
     }
     
     var showCardCvv: Bool {
-        guard derivedPaymentMethod != nil else { return true }
+        if derivedPaymentMethod == nil {
+            return knownOptionsSet.contains(.cvv)
+        }
         return hasPaymentOption(key: .cvv)
     }
     
@@ -58,7 +62,9 @@ final class CardFormViewModel: ObservableObject {
     }
     
     var showCardHolderName: Bool {
-        guard derivedPaymentMethod != nil else { return true }
+        if derivedPaymentMethod == nil {
+            return knownOptionsSet.contains(.cardHolder)
+        }
         return hasPaymentOption(key: .cardHolder)
     }
     
