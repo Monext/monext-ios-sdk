@@ -66,6 +66,7 @@
       }
     },
     "Back to the app" : {
+      "comment" : "Back button title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

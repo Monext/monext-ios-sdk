@@ -106,6 +106,9 @@ public final class Appearance: Sendable {
     public let headerBackgroundColor: Color
     public let onHeaderBackgroundColor: Color
     
+    // MARK: Button
+    public let backButtonText: String?
+    
     // MARK: Result
     
     /// The image shown to the user on the success screen when the transaction has succeeded
@@ -167,6 +170,8 @@ public final class Appearance: Sendable {
         headerBackgroundColor: Color = Defaults.headerBackgroundColor,
         onHeaderBackgroundColor: Color = Defaults.onHeaderBackgroundColor,
         
+        backButtonText: String? = nil,
+        
         successImage: Image? = nil,
         failureImage: Image? = nil
     ) {
@@ -218,6 +223,8 @@ public final class Appearance: Sendable {
         self.headerBackgroundColor = headerBackgroundColor
         self.onHeaderBackgroundColor = onHeaderBackgroundColor
         self.onHeaderBackgroundAlpha = onHeaderBackgroundColor.opacity(0.1)
+        
+        self.backButtonText = backButtonText
         
         self.successImage = successImage
         self.failureImage = failureImage

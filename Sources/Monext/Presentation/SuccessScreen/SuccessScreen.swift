@@ -75,7 +75,7 @@ struct SuccessScreen: View {
             .background(config.backgroundColor)
             
             Button(action: { onExit() }) {
-                Text("Back to the app")
+                Text(LocalizedStringKey(config.backButtonText ?? "Back to the app"))
                     .font(config.fonts.bold18)
                     .padding(.vertical, 10)
                     .foregroundStyle(config.onSecondaryColor)
