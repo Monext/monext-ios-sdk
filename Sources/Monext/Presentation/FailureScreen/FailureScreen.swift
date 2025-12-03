@@ -61,7 +61,7 @@ struct FailureScreen: View {
             VStack(spacing: 10) {
                 
                 Button(action: { onExit() }) {
-                    Text("Back to the app")
+                    Text(LocalizedStringKey(config.backButtonText ?? "Back to the app"))
                         .font(config.fonts.bold18)
                         .foregroundStyle(config.onSurfaceColor)
                         .padding(.vertical, 10)
