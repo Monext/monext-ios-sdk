@@ -120,10 +120,10 @@ struct SdkChallengeData: Decodable, Equatable {
 struct ActiveWaiting: Decodable, Equatable {
     let needActiveWaitingAction: Bool
     let message: CustomMessage?
-    let cardCode: String
-    let contractNumber: String
-    let walletCardIndex: Int
-    let merchantReturnUrl: String
+    let cardCode: String?
+    let contractNumber: String?
+    let walletCardIndex: Int?
+    let merchantReturnUrl: String?
 }
 
 struct PaymentMethodsList: Decodable, Equatable {
