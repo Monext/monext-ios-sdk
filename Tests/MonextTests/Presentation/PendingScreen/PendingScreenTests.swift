@@ -18,12 +18,13 @@ final class PendingScreenTests: XCTestCase {
     @MainActor
     private func makeSUT(
         sessionState: SessionState? = nil,
+        appearance: Appearance = .init(),
         onExitCalled: UnsafeMutablePointer<Bool>? = nil
     ) -> (view: some View, store: SessionStateStore) {
         let store = SessionStateStore(
             environment: .sandbox,
             sessionState: sessionState,
-            appearance: .init(),
+            appearance: appearance,
             config: .init(),
             applePayConfiguration: .init(
                 buttonLabel: .buy,
@@ -119,4 +120,35 @@ final class PendingScreenTests: XCTestCase {
         
         XCTAssertEqual(text, "Hello World")
     }
+    
+    @MainActor
+    func testCustomButtonDisplayed() throws {
+        let (sut, _) = makeSUT(
+            appearance: .init(
+                backButtonText: "Ceci est un bouton de retour"
+            )
+        )
+        ViewHosting.host(view: sut)
+        
+        let text = try sut.inspect()
+            .view(PendingScreen.self)
+            .find(text: "Ceci est un bouton de retour")
+            .string()
+        
+        XCTAssertEqual(text, "Ceci est un bouton de retour")
+    }
+    
+    @MainActor
+    func testButtonDisplayed() throws {
+        let (sut, _) = makeSUT()
+        ViewHosting.host(view: sut)
+        
+        let text = try sut.inspect()
+            .view(PendingScreen.self)
+            .find(text: "Back to the app")
+            .string()
+        
+        XCTAssertEqual(text, "Back to the app")
+    }
+    
 }
