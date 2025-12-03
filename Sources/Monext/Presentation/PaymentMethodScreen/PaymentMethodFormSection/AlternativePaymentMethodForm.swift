@@ -71,25 +71,30 @@ struct AlternativePaymentMethodForm: View {
                 .foregroundStyle(appearance.onBackgroundColor)
                 .lineLimit(2, reservesSpace: true)
         case "INPUT":
-            FormFieldView(
-                label: LocalizedStringKey(field.label ?? ""),
-                textValue: Binding(
-                    get: { fieldValues[field.id] ?? "" },
-                    set: {
-                        fieldValues[field.id] = $0
-                        if !$0.isEmpty || $0 == "" {
-                            touchedFields.insert(field.id)
+            switch field.formInputFieldType {
+            case "TEXT":
+                FormFieldView(
+                    label: LocalizedStringKey(field.label ?? ""),
+                    textValue: Binding(
+                        get: { fieldValues[field.id] ?? "" },
+                        set: {
+                            fieldValues[field.id] = $0
+                            if !$0.isEmpty || $0 == "" {
+                                touchedFields.insert(field.id)
+                            }
                         }
-                    }
-                ),
-                errorMessage: getErrorMessage(for: field),
-                formatter: getFormatter(for: field),
-                keyboardType: getKeyboardType(for: field),
-                focusedState: $focusedField,
-                focusedField: field.id,
-                placeholder: field.placeholder
-            )
-            .padding(.vertical, 8)
+                    ),
+                    errorMessage: getErrorMessage(for: field),
+                    formatter: getFormatter(for: field),
+                    keyboardType: getKeyboardType(for: field),
+                    focusedState: $focusedField,
+                    focusedField: field.id,
+                    placeholder: field.placeholder
+                )
+                .padding(.vertical, 8)
+            default:
+                EmptyView()
+            }
         default:
             EmptyView()
         }
