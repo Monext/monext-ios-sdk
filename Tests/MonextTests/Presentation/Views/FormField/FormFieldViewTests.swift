@@ -117,8 +117,7 @@ final class FormFieldViewTests: XCTestCase {
         )
         ViewHosting.host(view: host)
         
-        let placeholder = try host.inspect().find(text: "0000 0000 0000 0000").string()
-        XCTAssertEqual(placeholder, "0000 0000 0000 0000")
+        XCTAssertEqual(host.placeholder, "0000 0000 0000 0000")
     }
     
     @MainActor

@@ -7,13 +7,19 @@
 
 struct CardDateFormatter: FormFieldView<CardField>.Formatter {
     
+    private static let maxLength = 4
+    
     func preformattedRawValue(_ value: String) -> String {
-        value.restrictToNumericInput()
+        return String(
+            value
+                .restrictToNumericInput()
+                .prefix(Self.maxLength)
+        )
     }
     
     func format(_ value: String) -> String {
-        let value = preformattedRawValue(value)
-        let truncated = String(value.prefix(4))
-        return truncated.chunked(into: 2, separator: " / ")
+        let digits = preformattedRawValue(value)
+        // chunked(in:2) -> "MM / YY"
+        return digits.chunked(into: 2, separator: " / ")
     }
 }

@@ -1,4 +1,3 @@
-//
 //  FormFieldView.swift
 //  Monext
 //
@@ -9,39 +8,25 @@ import SwiftUI
 import UIKit
 
 struct FormFieldView<ID: Hashable>: View {
-    
+
     let label: LocalizedStringKey
-    
     @Binding var textValue: String
-    
     let errorMessage: LocalizedStringKey?
-    
     let formatter: (any FormFieldView.Formatter)?
-    
     var useOnSurfaceStyle: Bool = false
-    
     var keyboardType: UIKeyboardType = .default
-    
     var focusedState: FocusState<ID?>.Binding
     let focusedField: ID?
-    
     var onTappedInfoAccessory: (() -> Void)?
-    
     var placeholder: String? = nil
-    
-    @State
-    private var formattedText: String = ""
-    
+
     private var isFocused: Bool {
         focusedState.wrappedValue == focusedField
     }
-    
+
     @EnvironmentObject var sessionStore: SessionStateStore
-    
-    private var config: Appearance {
-        sessionStore.appearance
-    }
-    
+    private var config: Appearance { sessionStore.appearance }
+
     var borderColor: Color {
         if errorMessage != nil {
             return config.errorColor
@@ -57,7 +42,7 @@ struct FormFieldView<ID: Hashable>: View {
         }
         return config.textfieldBorderColor
     }
-    
+
     var labelColor: Color {
         if errorMessage != nil {
             return config.errorColor
@@ -73,28 +58,27 @@ struct FormFieldView<ID: Hashable>: View {
         }
         return config.textfieldLabelColor
     }
-    
+
     var labelBackground: Color {
         if label.isEmpty {
-             return .clear
-         }
+            return .clear
+        }
         if useOnSurfaceStyle {
             return config.surfaceColor
         }
         return config.backgroundColor
     }
-    
+
     var labelUnderlay: Color {
         if useOnSurfaceStyle {
             return config.primaryAlpha
         }
         return .clear
     }
-    
+
     var body: some View {
-        
         VStack(alignment: .leading, spacing: -11) {
-            
+
             Text(label)
                 .font(config.fonts.semibold12)
                 .kerning(0.4)
@@ -106,18 +90,37 @@ struct FormFieldView<ID: Hashable>: View {
                 .clipShape(RoundedRectangle(cornerRadius: 4))
                 .padding(.leading, 16)
                 .zIndex(1)
-            
+
             VStack(alignment: .leading, spacing: 0) {
-                
+
                 HStack {
-                    
-                    TextField(placeholder ?? "", text: $formattedText)
-                        .focused(focusedState, equals: focusedField)
-                        .foregroundStyle(config.textfieldTextColor)
-                        .tint(config.textfieldTextColor)
-                        .keyboardType(keyboardType)
-                        .textFieldStyle(MonextTextFieldStyle(config: config))
-                    
+                    // Build UIFont from AvenirNext-DemiBold for semibold20
+                    let uiFont: UIFont = {
+                        if let f = UIFont(name: "AvenirNext-DemiBold", size: 20) {
+                            return f
+                        }
+                        return UIFont.preferredFont(forTextStyle: .title2)
+                    }()
+
+                    let uiTextColor = UIColor(config.textfieldTextColor)
+                    let uiPlaceholderColor = UIColor(config.textfieldLabelColor).withAlphaComponent(0.6)
+
+                    FormattingTextField<ID>(
+                        rawText: $textValue,
+                        formatter: formatter,
+                        placeholder: placeholder ?? "",
+                        keyboardType: keyboardType,
+                        focusedState: focusedState,
+                        focusedField: focusedField,
+                        uiFont: uiFont,
+                        textColor: uiTextColor,
+                        placeholderColor: uiPlaceholderColor,
+                        kerning: 3,
+                        contentInsets: UIEdgeInsets(top: 16, left: 20, bottom: 16, right: 20)
+                    )
+                    .frame(minHeight: 52)
+                    .background(Color.clear)
+
                     if onTappedInfoAccessory != nil {
                         Image(moduleImage: "ic.i.circle.filled")
                             .foregroundStyle(
@@ -144,88 +147,15 @@ struct FormFieldView<ID: Hashable>: View {
                             lineWidth: isFocused ? config.textfieldStrokeSelected : config.textfieldStroke
                         )
                 }
-                
-                if let errorMessage {
-                    Text(errorMessage)
-                        .font(config.fonts.semibold12)
-                        .kerning(0.4)
-                        .foregroundStyle(config.errorColor)
-                }
-            }
-        }
-        // --- Synchronisation dans les deux sens ---
-        .onAppear {
-            // Synchronise au premier affichage (préremplissage, navigation, etc.)
-            formattedText = formatter?.format(textValue) ?? textValue
-        }
-        .onChange(of: textValue) { newRaw in
-            // Synchronise quand textValue change de l'extérieur (préremplissage, reset, etc.)
-            let newFormatted = formatter?.format(newRaw) ?? newRaw
-            if formattedText != newFormatted {
-                formattedText = newFormatted
-            }
-        }
-        .onChange(of: formattedText) { changedText in
-            // Synchronise la valeur brute à chaque saisie utilisateur
-            let rawValue = formatter?.preformattedRawValue(changedText) ?? changedText
-            if textValue != rawValue {
-                textValue = rawValue
-            }
-        }
-    }
-}
 
-#Preview {
-    
-    let fs = FocusState()
-    
-    VStack {
-        
-        Spacer()
-        
-        FormFieldView<CardField>(
-            label: "Card Number",
-            textValue: .constant(""),
-            errorMessage: nil,
-            formatter: CardNumberFormatter(),
-            keyboardType: .numberPad,
-            focusedState: FocusState<CardField?>().projectedValue,
-            focusedField: .cardNumber,
-            placeholder: "0000 0000 0000 0000"
-        )
-        .padding()
-        
-        Spacer()
-        
-        FormFieldView<CardField>(
-            label: "CVV",
-            textValue: .constant(""),
-            errorMessage: "An error occurred!",
-            formatter: CardCvvFormatter(),
-            keyboardType: .numberPad,
-            focusedState: FocusState<CardField?>().projectedValue,
-            focusedField: .cvv,
-            placeholder: "123"
-        )
-        .padding()
-        
-        Spacer()
-        
-        FormFieldView<CardField>(
-            label: "CVV",
-            textValue: .constant(""),
-            errorMessage: nil,
-            formatter: CardCvvFormatter(),
-            keyboardType: .numberPad,
-            focusedState: FocusState<CardField?>().projectedValue,
-            focusedField: .cvv,
-            onTappedInfoAccessory: {}
-        )
-        .padding()
-        
-        Spacer()
+                Text(errorMessage ?? "")
+                    .font(config.fonts.semibold12)
+                    .kerning(0.4)
+                    .foregroundStyle(config.errorColor)
+                    .opacity(errorMessage == nil ? 0 : 1)
+                    .frame(height: 10, alignment: .leading)
+                    .padding(.top, 4)
+            }
+        }
     }
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .background(PreviewData.sessionStore.appearance.backgroundColor)
-    .environmentObject(PreviewData.sessionStore)
 }
