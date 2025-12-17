@@ -9,7 +9,7 @@ import Foundation
 @testable import Monext
 
 final class MockPaymentAPI: PaymentAPIProtocol {
-    
+
     func stateCurrent(sessionToken: String) async throws -> Monext.SessionState {
         throw NSError(domain: "Mock", code: -1)
     }
@@ -65,6 +65,14 @@ final class MockPaymentAPI: PaymentAPIProtocol {
                 rootPublicKey: "mock-amex-root-public-key"
             )
         ])
+    }
+    
+    func sendLog(message: String, level: String, url: String?, token: String?, loggerName: String) async throws {
+        throw NSError(domain: "Mock", code: -1)
+    }
+    
+    func sendError(message: String, url: String?, token: String?, loggerName: String) {
+        return;
     }
     
     func returnURLString(sessionToken: String) -> String {
