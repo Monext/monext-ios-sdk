@@ -16,6 +16,8 @@ protocol PaymentAPIProtocol: Sendable {
     func walletPayment(sessionToken: String, params: WalletPaymentRequest) async throws -> SessionState
     func availableCardNetworks(sessionToken: String, params: AvailableCardNetworksRequest) async throws -> AvailableCardNetworksResponse
     func fetchSchemes(sessionToken: String) async throws -> DirectoryServerSdkKeyListResponse
+    func sendLog(message: String, level: String, url: String?, token: String?, loggerName: String) async throws
+    func sendError(message: String, url: String?, token: String?, loggerName: String)
     func returnURLString(sessionToken: String) -> String
     func getEnvironment() -> MnxtEnvironment
 }

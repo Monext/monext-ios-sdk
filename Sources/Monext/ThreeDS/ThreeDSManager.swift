@@ -25,6 +25,8 @@ class ThreeDS2Manager: ObservableObject {
 
     private var directoryServerId: String?
     
+    private(set) var sessionToken: String?
+    
     private let isDevelopmentMode: Bool
     
     var onChallengeCompleted: ((ChallengeStatus?, Error?) -> Void)?
@@ -102,6 +104,7 @@ class ThreeDS2Manager: ObservableObject {
     func initialize(sessionToken: String?, locale: String, cardNetworkName: String) async throws {
         guard let service = threeDS2Service else { return }
         
+        self.sessionToken = sessionToken
         isLoading = true
         
         do {
@@ -129,7 +132,7 @@ class ThreeDS2Manager: ObservableObject {
                         DispatchQueue.main.async {
                             self?.isLoading = false
                             self?.loadWarnings()
-                            print("Erreur d'initialisation: \(error.localizedDescription)")
+                            self?.paymentAPI.sendError(message: "Erreur d'initialisation: \(error.localizedDescription)", url: nil, token: self?.sessionToken, loggerName: "ThreeDSManager")
                             continuation.resume(throwing: error)
                         }
                     }
@@ -139,7 +142,7 @@ class ThreeDS2Manager: ObservableObject {
             await MainActor.run {
                 isLoading = false
             }
-            print("Erreur de configuration: \(error.localizedDescription)")
+            self.paymentAPI.sendError(message: "Erreur de configuration: \(error.localizedDescription)", url: nil, token: self.sessionToken, loggerName: "ThreeDSManager")
             throw error
         }
     }
@@ -173,7 +176,7 @@ class ThreeDS2Manager: ObservableObject {
         } catch {
             DispatchQueue.main.async {
                 self.isLoading = false
-                print("Erreur création transaction: \(error.localizedDescription)")
+                self.paymentAPI.sendError(message: "Erreur création transaction: \(error.localizedDescription)", url: nil, token: self.sessionToken, loggerName: "ThreeDSManager")
             }
             throw error
         }
@@ -212,7 +215,7 @@ class ThreeDS2Manager: ObservableObject {
             return try await generateSDKContextData()
         } catch {
             DispatchQueue.main.async {
-                print("Erreur génération contexte SDK: \(error.localizedDescription)")
+                self.paymentAPI.sendError(message: "Erreur génération contexte SDK: \(error.localizedDescription)", url: nil, token: self.sessionToken, loggerName: "ThreeDSManager")
             }
             return nil
         }
@@ -229,7 +232,7 @@ class ThreeDS2Manager: ObservableObject {
             let progressDialog = try transaction.getProgressView()
             show ? progressDialog.start() : progressDialog.stop()
         } catch {
-            print("Error showing progress dialog: \(error.localizedDescription)")
+            paymentAPI.sendError(message: "Error showing progress dialog: \(error.localizedDescription)", url: nil, token: sessionToken, loggerName: "ThreeDSManager")
         }
     }
     
@@ -243,7 +246,7 @@ class ThreeDS2Manager: ObservableObject {
         do {
             try transaction.close()
         } catch {
-            print("Erreur lors de la fermeture de la transaction: \(error.localizedDescription)")
+            paymentAPI.sendError(message: "Erreur lors de la fermeture de la transaction: \(error.localizedDescription)", url: nil, token: sessionToken, loggerName: "ThreeDSManager")
         }
         
         currentTransaction = nil
@@ -255,7 +258,7 @@ class ThreeDS2Manager: ObservableObject {
         do {
             try service.cleanup()
         } catch {
-            print("Erreur lors du nettoyage du service: \(error)")
+            paymentAPI.sendError(message: "Erreur lors du nettoyage du service: \(error)", url: nil, token: sessionToken, loggerName: "ThreeDSManager")
         }
     }
     
@@ -269,7 +272,7 @@ class ThreeDS2Manager: ObservableObject {
                 "[\(warning.getSeverity())] \(warning.getMessage())"
             }
         } catch {
-            print("Erreur lors de la récupération des warnings: \(error)")
+            paymentAPI.sendError(message: "Erreur lors de la récupération des warnings: \(error)", url: nil, token: sessionToken, loggerName: "ThreeDSManager")
         }
     }
 }
