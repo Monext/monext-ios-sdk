@@ -364,6 +364,80 @@ class PaymentAPITests: BaseAPITestCase {
         XCTAssertEqual(result.directoryServerSdkKeyList[4].rootPublicKey, "MOCK_ROOT_PUBLIC_KEY_5")
     }
     
+    func testLogs() async throws {
+        // Given
+        let token = "testToken123"
+        let expectation = expectation(description: "log endpoint called twice (sendLog + report)")
+        expectation.expectedFulfillmentCount = 2
+
+        await MockURLProtocol.setHandler({ request in
+            // Basic assertions on the request
+            XCTAssertEqual(request.httpMethod, "POST", "Log endpoint should be called with POST")
+            XCTAssertTrue(request.url?.path.hasSuffix("/log") ?? false, "Request should target /log")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "application/x-www-form-urlencoded")
+
+            // Extract body either from httpBody or from httpBodyStream
+            var bodyData: Data?
+            if let httpBody = request.httpBody {
+                bodyData = httpBody
+            } else if let stream = request.httpBodyStream {
+                stream.open()
+                defer { stream.close() }
+                let bufferSize = 1024
+                let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
+                defer { buffer.deallocate() }
+                var data = Data()
+                while stream.hasBytesAvailable {
+                    let read = stream.read(buffer, maxLength: bufferSize)
+                    if read > 0 {
+                        data.append(buffer, count: read)
+                    } else {
+                        break
+                    }
+                }
+                bodyData = data
+            }
+
+            guard let data = bodyData else {
+                XCTFail("Request body should not be nil")
+                DispatchQueue.main.async { expectation.fulfill() }
+                let response = HTTPURLResponse(
+                    url: request.url!,
+                    statusCode: 200,
+                    httpVersion: nil,
+                    headerFields: nil
+                )!
+                return (response, Data())
+            }
+
+            if let bodyString = String(data: data, encoding: .utf8) {
+                XCTAssertTrue(bodyString.contains("data="), "Form body should contain data")
+                XCTAssertTrue(bodyString.contains("layout=JsonLayout"), "Form body should contain layout param")
+            } else {
+                XCTFail("Unable to decode request body to string")
+            }
+
+            DispatchQueue.main.async { expectation.fulfill() }
+
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            // return always 200 and empty body
+            return (response, Data())
+        })
+
+        // When: sendLog (awaited) and report (fire-and-forget)
+        try await api.sendLog(message: "Unit test log", level: "INFO", url: "https://example.com", token: token, loggerName: "PaymentAPITests")
+        api.sendError(message: "Report log from test", url: "https://example.com", token: token, loggerName: "PaymentAPITests")
+
+        // Then: wait for both calls to be processed by the mock (async-friendly)
+        await fulfillment(of: [expectation], timeout: 5.0)
+    }
+      
+    
     // MARK: - Utility Tests
     
     /// Tests the return URL generation utility to verify it creates the correct

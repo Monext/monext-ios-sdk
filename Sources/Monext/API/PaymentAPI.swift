@@ -21,6 +21,7 @@ final class PaymentAPI: PaymentAPIProtocol {
         case walletPayment(token: String)
         case availableCardNetworks(token: String)
         case fetchSchemes(token: String)
+        case log
         
         var path: String {
             let tokenPath = "/token/\(token)"
@@ -42,6 +43,8 @@ final class PaymentAPI: PaymentAPIProtocol {
                 return "\(tokenPath)/availablecardnetworks"
             case .fetchSchemes:
                 return "\(tokenPath)/directoryServerSdkKeys"
+            case .log:
+                return "/log"
             }
         }
         
@@ -56,6 +59,8 @@ final class PaymentAPI: PaymentAPIProtocol {
                  .availableCardNetworks(let token),
                  .fetchSchemes(let token):
                 return token
+            case .log:
+                return ""
             }
         }
     }
@@ -152,6 +157,43 @@ final class PaymentAPI: PaymentAPIProtocol {
        )
    }
     
+    // MARK: - Logging API
+    public func sendLog(message: String, level: String = "INFO", url: String? = "", token: String? = "", loggerName: String = "") async throws {
+        let payload = LogPayload(
+            logger: "SDK iOS - \(AppVersion.marketingVersion)",
+            timestamp: Self.currentTimestampMillis(),
+            level: level,
+            url: url,
+            message:
+                "\(loggerName) - \(message)",
+            token: token
+        )
+        try await performVoidRequest(endpoint: .log, method: .POST, parameters: payload)
+    }
+    
+    public func sendError(
+        message: String,
+        url: String? = "",
+        token: String? = "",
+        loggerName: String = ""
+    ) {
+        Task { [weak self] in
+            guard let self = self else { return }
+            do {
+                print("ERROR: \(loggerName) - \(message)")
+                try await self.sendLog(
+                    message: message,
+                    level: "ERROR",
+                    url: url,
+                    token: token,
+                    loggerName: loggerName
+                )
+            } catch {
+                Logger.network.error("Failed to report error to /payline-widget/log: \(error, privacy: .public)")
+            }
+        }
+    }
+    
     func returnURLString(sessionToken: String) -> String {
             var comps = URLComponents()
             let (host, extraPath) = extractHostAndPath(from: environment.host)
@@ -168,19 +210,131 @@ final class PaymentAPI: PaymentAPIProtocol {
     
 }
 
-// MARK: - Private Methods
+// MARK: - Private Helpers & Networking
 private extension PaymentAPI {
+    struct LogPayload: Encodable {
+        let logger: String
+        let timestamp: Int64
+        let level: String
+        let url: String?
+        let message: String
+        let token: String?
+        
+        enum CodingKeys: String, CodingKey {
+            case logger, timestamp, level, url, message, token
+        }
+    }
+    
+    private static func currentTimestampMillis() -> Int64 {
+        return Int64(Date().timeIntervalSince1970 * 1000)
+    }
+    
+    private struct EmptyParams: Encodable {}
+    
+    struct EmptyResponse: Decodable {}
+    
     private func performRequest<T: Decodable, P: Encodable>(
         endpoint: Endpoint,
         method: HTTPMethod,
-        parameters: P? = ""
+        parameters: P? = nil
     ) async throws -> T {
         let url = try createURL(for: endpoint)
         let request = try buildRequest(url: url, method: method, parameters: parameters)
         return try await makeRequest(request: request)
     }
     
+    private func performRequest<T: Decodable>(
+        endpoint: Endpoint,
+        method: HTTPMethod
+    ) async throws -> T {
+        return try await performRequest(endpoint: endpoint, method: method, parameters: Optional<EmptyParams>.none)
+    }
+    
+    private func performVoidRequest<P: Encodable>(
+        endpoint: Endpoint,
+        method: HTTPMethod,
+        parameters: P? = nil
+    ) async throws {
+        let url = try createURL(for: endpoint)
+        let request = try buildVoidRequest(url: url, endpoint: endpoint, method: method, parameters: parameters)
+
+        let (data, response) = try await session.data(for: request)
+        logResponse(response, data: data)
+        _ = try mapResponse(response: (data: data, response: response))
+    }
+
+    /// Construit la requête pour les endpoints void. Gère le cas particulier de /log (form-urlencoded).
+    private func buildVoidRequest<P: Encodable>(
+        url: URL,
+        endpoint: Endpoint,
+        method: HTTPMethod,
+        parameters: P? = nil
+    ) throws -> URLRequest {
+        if case .log = endpoint {
+            var request = URLRequest(url: url)
+            request.httpMethod = method.rawValue
+
+            let (host, _) = extractHostAndPath(from: environment.host)
+
+            // Headers adaptés pour form-urlencoded
+            request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+            request.setValue(self.applicationJSON, forHTTPHeaderField: "Accept")
+            request.setValue(config.language ?? Locale.current.language.languageCode?.identifier ?? self.defaultLanguage,
+                             forHTTPHeaderField: "Accept-Language")
+            request.setValue(host, forHTTPHeaderField: "Origin")
+            request.setValue("IOS \(AppVersion.fullVersion)", forHTTPHeaderField: "X-Widget-SDK")
+
+            if method != .GET, let params = parameters {
+                request.httpBody = try formURLEncodedBody(for: params, wrapArray: true)
+            }
+
+            return request
+        } else {
+            return try buildRequest(url: url, method: method, parameters: parameters)
+        }
+    }
+    
+    // Helper pour encoder un Encodable en "data=[{...}]&layout=JsonLayout"
+    private func formURLEncodedBody<P: Encodable>(for parameters: P, wrapArray: Bool = true) throws -> Data {
+        let encoder = JSONEncoder()
+        // Configure le encoder si besoin (dates, etc.)
+        let jsonData = try encoder.encode(parameters)
+        guard var jsonString = String(data: jsonData, encoding: .utf8) else {
+            throw NetworkError.encodingError(NSError(domain: "Encoding", code: -1, userInfo: [NSLocalizedDescriptionKey: "Cannot convert JSON data to string"]))
+        }
+
+        if wrapArray {
+            jsonString = "[\(jsonString)]"
+        }
+
+        var components = URLComponents()
+        components.queryItems = [
+            URLQueryItem(name: "data", value: jsonString),
+            URLQueryItem(name: "layout", value: "JsonLayout")
+        ]
+
+        guard let percentEncodedQuery = components.percentEncodedQuery,
+              let body = percentEncodedQuery.data(using: .utf8) else {
+            throw NetworkError.encodingError(NSError(domain: "Encoding", code: -1, userInfo: [NSLocalizedDescriptionKey: "Cannot build form body"]))
+        }
+
+        return body
+    }
+    
     private func createURL(for endpoint: Endpoint) throws -> URL {
+        if case .log = endpoint {
+            let (host, extraPath) = extractHostAndPath(from: environment.host)
+            var comps = URLComponents()
+            comps.scheme = self.scheme
+            comps.host = host
+            comps.path = extraPath + endpoint.path
+            guard let url = comps.url else {
+                throw NetworkError.invalidURL
+            }
+            return url
+        }
+        
+        // baseURL (/services) + endpoint.path
         let baseURLString = baseURL.absoluteString.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
         let fullURLString = baseURLString + endpoint.path
         
@@ -200,13 +354,11 @@ private extension PaymentAPI {
         
         let (host, _) = extractHostAndPath(from: environment.host)
         
-        
-        
         // Add headers
         let headers = [
             "Content-Type": self.applicationJSON,
             "Accept": self.applicationJSON,
-            "Accept-Language": config.language ?? Locale.current.language.languageCode?.identifier ?? self.defaultLanguage, // Returns the value configured by the integrator in MnxtSDKConfiguration, or the language value of the device, or English by default.
+            "Accept-Language": config.language ?? Locale.current.language.languageCode?.identifier ?? self.defaultLanguage,
             "Origin": host,
             "X-Widget-SDK": "IOS \(AppVersion.fullVersion)",
         ]
@@ -214,7 +366,6 @@ private extension PaymentAPI {
         headers.forEach { request.addValue($0.value, forHTTPHeaderField: $0.key) }
         
         // N'ajoute le body que si ce n'est pas une requête GET et qu'il y a des paramètres
-        // TODO: Fix
         if method != .GET, let parameters = parameters {
             do {
                 request.httpBody = try JSONEncoder().encode(parameters)
@@ -230,11 +381,12 @@ private extension PaymentAPI {
         let (data, response) = try await session.data(for: request)
         logResponse(response, data: data)
         
-        let mappedResponse = try mapResponse(response: (data, response))
+        let mappedResponse = try mapResponse(response: (data: data, response: response))
         
         do {
             return try decoder.decode(T.self, from: mappedResponse)
         } catch {
+            self.sendError(message: error.localizedDescription)
             Logger.network.error("\(error, privacy: .public)")
             throw NetworkError.decodingError(error)
         }

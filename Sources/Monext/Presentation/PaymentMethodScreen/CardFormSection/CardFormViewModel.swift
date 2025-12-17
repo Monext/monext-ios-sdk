@@ -460,6 +460,7 @@ actor CardFormViewModelActor {
             return try await paymentAPI.availableCardNetworks(sessionToken: sessionToken, params: params)
             
         } catch {
+            paymentAPI.sendError(message: error.localizedDescription, url: "", token: sessionToken, loggerName: "CardFormViewModelActor")
             print(error)
             return nil
         }

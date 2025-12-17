@@ -1,10 +1,3 @@
-//
-//  PaymentScreen.swift
-//  Monext
-//
-//  Created by Joshua Pierce on 29/11/2024.
-//
-
 import SwiftUI
 
 struct PaymentMethodScreen: View {
@@ -184,13 +177,13 @@ struct PaymentMethodScreen: View {
                 await MainActor.run {
                     self.paymentVM.isLoading = false
                     self.showingOverlay = nil
-                    print("Erreur paiement: \(error.errorDescription ?? "")")
+                    sessionStore.getPaymentAPI().sendError(message: "Erreur paiement: \(error.errorDescription ?? "")", url: "", token: sessionStore.sessionState?.token, loggerName: "PaymentMethodScreen")
                 }
             } catch {
                 await MainActor.run {
                     self.paymentVM.isLoading = false
                     self.showingOverlay = nil
-                    print("Erreur paiement: \(PaymentError.networkError(error).errorDescription ?? "")")
+                    sessionStore.getPaymentAPI().sendError(message: "Erreur paiement: \(PaymentError.networkError(error).errorDescription ?? "")", url: "", token: sessionStore.sessionState?.token, loggerName: "PaymentMethodScreen")
                 }
             }
         }
@@ -242,13 +235,13 @@ struct PaymentMethodScreen: View {
                 await MainActor.run {
                     self.paymentVM.isLoading = false
                     self.showingOverlay = nil
-                    print("Erreur paiement: \(error.errorDescription ?? "")")
+                    sessionStore.getPaymentAPI().sendError(message: "Erreur paiement: \(error.errorDescription ?? "")", url: "", token: sessionStore.sessionState?.token, loggerName: "PaymentMethodScreen")
                 }
             } catch {
                 await MainActor.run {
                     self.paymentVM.isLoading = false
                     self.showingOverlay = nil
-                    print("Erreur paiement: \(PaymentError.networkError(error).errorDescription ?? "")")
+                    sessionStore.getPaymentAPI().sendError(message: "Erreur paiement: \(PaymentError.networkError(error).errorDescription ?? "")", url: "", token: sessionStore.sessionState?.token, loggerName: "PaymentMethodScreen")
                 }
             }
         }
@@ -296,13 +289,13 @@ struct PaymentMethodScreen: View {
                 await MainActor.run {
                     self.paymentVM.isLoading = false
                     self.showingOverlay = nil
-                    print("Erreur paiement wallet: \(error.errorDescription ?? "")")
+                    sessionStore.getPaymentAPI().sendError(message: "Erreur paiement wallet: \(error.errorDescription ?? "")", url: "", token: sessionStore.sessionState?.token, loggerName: "PaymentMethodScreen")
                 }
             } catch {
                 await MainActor.run {
                     self.paymentVM.isLoading = false
                     self.showingOverlay = nil
-                    print("Erreur paiement wallet: \(PaymentError.networkError(error).errorDescription ?? "")")
+                    sessionStore.getPaymentAPI().sendError(message: "Erreur paiement wallet: \(PaymentError.networkError(error).errorDescription ?? "")", url: "", token: sessionStore.sessionState?.token, loggerName: "PaymentMethodScreen")
                 }
             }
         }

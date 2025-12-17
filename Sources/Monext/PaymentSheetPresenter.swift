@@ -140,7 +140,7 @@ struct PaymentSheetPresenter: ViewModifier {
     
     private func handleChallengeResult(status: ChallengeStatus?, error: Error?) {
         if let error = error {
-            print("Challenge error: \(error.localizedDescription)")
+            sessionStateStore.getPaymentAPI().sendError(message: "Challenge error: \(error.localizedDescription)", url: nil, token: sessionToken, loggerName: "Netcetera")
             processChallengeResult(transStatus: "U", sdkTransID: "")
             return
         }
@@ -156,10 +156,10 @@ struct PaymentSheetPresenter: ViewModifier {
                 processChallengeResult(transStatus: transStatus, sdkTransID: sdkTransID)
 
             case .cancelled, .timedout,  .runtimeError:
-                print("Challenge failed with status: \(status)")
+                sessionStateStore.getPaymentAPI().sendError(message: "Challenge failed with status: \(status)", url: nil, token: sessionToken, loggerName: "Netcetera")
                 processChallengeResult(transStatus: "U", sdkTransID: "")
-
             case .protocolError(let protocolErrorEvent):
+                sessionStateStore.getPaymentAPI().sendError(message: "Challenge failed with error: \(protocolErrorEvent.getErrorMessage())", url: nil, token: sessionToken, loggerName: "Netcetera")
                 processChallengeResult(transStatus: "U", sdkTransID: protocolErrorEvent.getSDKTransactionID())
             }
         }
@@ -186,7 +186,7 @@ struct PaymentSheetPresenter: ViewModifier {
                 try await sessionStateStore.makeSdkPaymentRequest(params: response)
                 challengeExecuted = false
             } catch {
-                print("Erreur lors du paiement SDK : \(error.localizedDescription)")
+                sessionStateStore.getPaymentAPI().sendError(message: "Erreur lors du paiement SDK :  \(error.localizedDescription)", url: nil, token: sessionToken, loggerName: "Netcetera")
             }
         }
     }
