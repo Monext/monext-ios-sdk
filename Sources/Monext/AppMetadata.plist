@@ -5,7 +5,7 @@
 	<key>NetceteraAPIKey</key>
 	<string>${NETCETERA_API_KEY}</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.0</string>
+	<string>1.0.5</string>
 	<key>CFBundleVersion</key>
 	<string></string>
 </dict>
