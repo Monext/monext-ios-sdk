@@ -29,7 +29,15 @@ build_framework() {
   echo "Destination: $dest"
   echo
 
-  (xcodebuild -scheme "$scheme" -configuration "$CONFIGURATION" -destination "$dest" -sdk "$sdk" -derivedDataPath "$BUILD_DIR" SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES OTHER_SWIFT_FLAGS="-no-verify-emitted-module-interface") || exit 12
+  (xcodebuild -scheme "$scheme" \
+    -configuration "$CONFIGURATION" \
+    -destination "$dest" \
+    -sdk "$sdk" \
+    -derivedDataPath "$BUILD_DIR" \
+    SKIP_INSTALL=NO \
+    BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+    ENABLE_PREVIEWS=NO \
+    OTHER_SWIFT_FLAGS="-no-verify-emitted-module-interface") || exit 12
 
   product_path="$BUILD_DIR/Build/Products/$CONFIGURATION-$sdk"
   framework_path="$BUILD_DIR/Build/Products/$CONFIGURATION-$sdk/PackageFrameworks/$scheme.framework"
