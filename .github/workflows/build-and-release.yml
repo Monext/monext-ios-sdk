@@ -22,21 +22,33 @@ jobs:
       with:
         xcode-version: '16.2'
 
-    - name: Download iOS and iOS Simulator Platforms
+     - name: Download iOS and iOS Simulator Platforms
       run: |
         set -e
         echo "⬇️ Downloading iOS Platform..."
-        xcodebuild -downloadPlatform iOS
+        xcodebuild -downloadPlatform iOS || echo "iOS platform may already exist"
         echo "⬇️ Downloading iOS Simulator Platform..."
-        xcodebuild -downloadPlatform "iOS Simulator"
+        xcodebuild -downloadPlatform "iOS Simulator" || echo "iOS Simulator platform may already exist"
         echo "📱 SDKs after download:"
         xcodebuild -showsdks
         echo "🔎 Runtimes:"
         xcrun simctl list runtimes
         echo "✅ Verifying SDK paths..."
-        xcrun --sdk iphoneos --show-sdk-path
-        xcrun --sdk iphonesimulator --show-sdk-path
-
+        IPHONEOS_SDK=$(xcrun --sdk iphoneos --show-sdk-path)
+        IPHONESIMULATOR_SDK=$(xcrun --sdk iphonesimulator --show-sdk-path)
+        echo "Device SDK: $IPHONEOS_SDK"
+        echo "Simulator SDK: $IPHONESIMULATOR_SDK"
+        
+        if [ !  -d "$IPHONEOS_SDK" ]; then
+          echo "❌ iOS SDK not found at $IPHONEOS_SDK"
+          exit 1
+        fi
+        
+        if [ ! -d "$IPHONESIMULATOR_SDK" ]; then
+          echo "❌ iOS Simulator SDK not found at $IPHONESIMULATOR_SDK"
+          exit 1
+        fi
+        
     - name: Get version from plist
       id: get-version
       run: |
