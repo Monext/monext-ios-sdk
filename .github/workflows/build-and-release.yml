@@ -12,110 +12,110 @@ jobs:
       should-release: ${{ steps.check-release.outputs.should-release }}
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Set up Xcode 16.2
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: '16.2'
+      - name: Set up Xcode 16.2
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '16.2'
 
-     - name: Download iOS and iOS Simulator Platforms
-      run: |
-        set -e
-        echo "⬇️ Downloading iOS Platform..."
-        xcodebuild -downloadPlatform iOS || echo "iOS platform may already exist"
-        echo "⬇️ Downloading iOS Simulator Platform..."
-        xcodebuild -downloadPlatform "iOS Simulator" || echo "iOS Simulator platform may already exist"
-        echo "📱 SDKs after download:"
-        xcodebuild -showsdks
-        echo "🔎 Runtimes:"
-        xcrun simctl list runtimes
-        echo "✅ Verifying SDK paths..."
-        IPHONEOS_SDK=$(xcrun --sdk iphoneos --show-sdk-path)
-        IPHONESIMULATOR_SDK=$(xcrun --sdk iphonesimulator --show-sdk-path)
-        echo "Device SDK: $IPHONEOS_SDK"
-        echo "Simulator SDK: $IPHONESIMULATOR_SDK"
-        
-        if [ !  -d "$IPHONEOS_SDK" ]; then
-          echo "❌ iOS SDK not found at $IPHONEOS_SDK"
-          exit 1
-        fi
-        
-        if [ ! -d "$IPHONESIMULATOR_SDK" ]; then
-          echo "❌ iOS Simulator SDK not found at $IPHONESIMULATOR_SDK"
-          exit 1
-        fi
-        
-    - name: Get version from plist
-      id: get-version
-      run: |
-        VERSION=$(plutil -extract CFBundleShortVersionString raw Sources/Monext/AppMetadata.plist)
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
-        echo "📦 Version détectée: $VERSION"
-
-    - name: Check if release should be created
-      id: check-release
-      run: |
-        VERSION="${{ steps.get-version.outputs.version }}"
-        
-        # Vérifier si on est sur master/main
-        if [[ "${{ github.ref }}" == "refs/heads/master" ]] || [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-          # Vérifier si le tag existe déjà
-          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
-            echo "should-release=false" >> $GITHUB_OUTPUT
-            echo "🏷️ Tag v$VERSION existe déjà, pas de release"
-          else
-            echo "should-release=true" >> $GITHUB_OUTPUT
-            echo "✨ Nouvelle version détectée: v$VERSION"
+      - name: Download iOS and iOS Simulator Platforms
+        run: |
+          set -e
+          echo "⬇️ Downloading iOS Platform..."
+          xcodebuild -downloadPlatform iOS || echo "iOS platform may already exist"
+          echo "⬇️ Downloading iOS Simulator Platform..."
+          xcodebuild -downloadPlatform "iOS Simulator" || echo "iOS Simulator platform may already exist"
+          echo "📱 SDKs after download:"
+          xcodebuild -showsdks
+          echo "🔎 Runtimes:"
+          xcrun simctl list runtimes
+          echo "✅ Verifying SDK paths..."
+          IPHONEOS_SDK=$(xcrun --sdk iphoneos --show-sdk-path)
+          IPHONESIMULATOR_SDK=$(xcrun --sdk iphonesimulator --show-sdk-path)
+          echo "Device SDK: $IPHONEOS_SDK"
+          echo "Simulator SDK: $IPHONESIMULATOR_SDK"
+          
+          if [ !  -d "$IPHONEOS_SDK" ]; then
+            echo "❌ iOS SDK not found at $IPHONEOS_SDK"
+            exit 1
           fi
-        else
-          # Pas sur master/main (PR ou autre branche)
-          echo "should-release=false" >> $GITHUB_OUTPUT
-          echo "🔧 Branche: ${{ github.ref_name }}, pas de release"
-        fi
+          
+          if [ ! -d "$IPHONESIMULATOR_SDK" ]; then
+            echo "❌ iOS Simulator SDK not found at $IPHONESIMULATOR_SDK"
+            exit 1
+          fi
 
-    - name: Configure API Key
-      env:
-        NETCETERA_API_KEY: ${{ secrets.NETCETERA_API_KEY }}
-      run: |
-        if [ -z "$NETCETERA_API_KEY" ]; then
-          echo "⚠️ NETCETERA_API_KEY secret non configuré"
-          exit 1
-        fi
-        sed -i '' "s/\${NETCETERA_API_KEY}/$NETCETERA_API_KEY/g" Sources/Monext/AppMetadata.plist
-        echo "🔑 Clé API configurée"
+      - name: Get version from plist
+        id: get-version
+        run: |
+          VERSION=$(plutil -extract CFBundleShortVersionString raw Sources/Monext/AppMetadata.plist)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Version détectée: $VERSION"
 
-    - name: Clean build folders
-      run: |
-        rm -rf .build build dist Package.resolved .swiftpm/xcode
+      - name: Check if release should be created
+        id: check-release
+        run: |
+          VERSION="${{ steps.get-version.outputs.version }}"
+          
+          # Vérifier si on est sur master/main
+          if [[ "${{ github.ref }}" == "refs/heads/master" ]] || [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            # Vérifier si le tag existe déjà
+            if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+              echo "should-release=false" >> $GITHUB_OUTPUT
+              echo "🏷️ Tag v$VERSION existe déjà, pas de release"
+            else
+              echo "should-release=true" >> $GITHUB_OUTPUT
+              echo "✨ Nouvelle version détectée: v$VERSION"
+            fi
+          else
+            # Pas sur master/main (PR ou autre branche)
+            echo "should-release=false" >> $GITHUB_OUTPUT
+            echo "🔧 Branche: ${{ github.ref_name }}, pas de release"
+          fi
 
-    - name: Resolve SPM dependencies
-      run: |
-        swift package resolve
-        swift package show-dependencies
+      - name: Configure API Key
+        env:
+          NETCETERA_API_KEY: ${{ secrets.NETCETERA_API_KEY }}
+        run: |
+          if [ -z "$NETCETERA_API_KEY" ]; then
+            echo "⚠️ NETCETERA_API_KEY secret non configuré"
+            exit 1
+          fi
+          sed -i '' "s/\${NETCETERA_API_KEY}/$NETCETERA_API_KEY/g" Sources/Monext/AppMetadata.plist
+          echo "🔑 Clé API configurée"
 
-    - name: Build XCFramework
-      run: |
-        chmod +x build_xcframework.sh
-        bash -x build_xcframework.sh
+      - name: Clean build folders
+        run: |
+          rm -rf .build build dist Package.resolved .swiftpm/xcode
 
-    - name: Prepare release bundle
-      run: |
-        VERSION="${{ steps.get-version.outputs.version }}"
-        zip -r "Monext-${VERSION}.zip" dist/Monext.xcframework -x "*.DS_Store*"
-        ls -l dist || true
+      - name: Resolve SPM dependencies
+        run: |
+          swift package resolve
+          swift package show-dependencies
 
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: monext-build-${{ steps.get-version.outputs.version }}-${{ github.run_number }}
-        path: |
-          dist/Monext.xcframework
-          Monext-${{ steps.get-version.outputs.version }}.zip
-        retention-days: 90
+      - name: Build XCFramework
+        run: |
+          chmod +x build_xcframework.sh
+          bash -x build_xcframework.sh
+
+      - name: Prepare release bundle
+        run: |
+          VERSION="${{ steps.get-version.outputs.version }}"
+          zip -r "Monext-${VERSION}.zip" dist/Monext.xcframework -x "*.DS_Store*"
+          ls -l dist || true
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: monext-build-${{ steps.get-version.outputs.version }}-${{ github.run_number }}
+          path: |
+            dist/Monext.xcframework
+            Monext-${{ steps.get-version.outputs.version }}.zip
+          retention-days: 90
 
   release:
     needs: build
@@ -123,71 +123,71 @@ jobs:
     if: needs.build.outputs.should-release == 'true'
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Download build artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: monext-build-${{ needs.build.outputs.version }}-${{ github.run_number }}
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: monext-build-${{ needs.build.outputs.version }}-${{ github.run_number }}
 
-    - name: Generate Release Notes
-      id: release-notes
-      run: |
-        set -e
-        VERSION="${{ needs.build.outputs.version }}"
-        LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-        if [ -n "$LAST_TAG" ]; then
-          COMMITS=$(git log $LAST_TAG..HEAD --oneline --pretty=format:"- %s (%h)")
-        else
-          COMMITS=$(git log --oneline --pretty=format:"- %s (%h)" -10)
-        fi
-        cat > release-notes.md << EOF
-        ## 🚀 Monext v$VERSION
+      - name: Generate Release Notes
+        id: release-notes
+        run: |
+          set -e
+          VERSION="${{ needs.build.outputs.version }}"
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -n "$LAST_TAG" ]; then
+            COMMITS=$(git log $LAST_TAG..HEAD --oneline --pretty=format:"- %s (%h)")
+          else
+            COMMITS=$(git log --oneline --pretty=format:"- %s (%h)" -10)
+          fi
+          cat > release-notes.md << EOF
+          ## 🚀 Monext v$VERSION
+          
+          ### 📋 Changements
+          $COMMITS
+          
+          ### 🔧 Installation
+          Monext iOS SDK is available via [Swift Package Manager](https://www.swift.org/documentation/package-manager/).
+          
+          ### Swift Package Manager
+          
+          1. **Add the Package Dependency:**  
+             Follow Apple's guide on [Adding Package Dependencies to Your App](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app).
+          
+          2. **Enter the Repository URL:**
+             \`\`\`
+             https://github.com/Monext/monext-ios-sdk
+             \`\`\`  
+          
+          3. **Specify the Version:**  
+             Use version \`$VERSION\` or later.
+          
+          ### 📦 Contenu de la release
+          - Monext.xcframework
+          - Archive zip
+          
+          ---
+          **Build Date:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          **Commit:** \`${{ github.sha }}\`
+          EOF
 
-        ### 📋 Changements
-        $COMMITS
-        
-        ### 🔧 Installation
-        Monext iOS SDK is available via [Swift Package Manager](https://www.swift.org/documentation/package-manager/).
-        
-        ### Swift Package Manager
-        
-        1. **Add the Package Dependency:**  
-           Follow Apple's guide on [Adding Package Dependencies to Your App](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app).
-        
-        2. **Enter the Repository URL:**
-           \`\`\`
-           https://github.com/Monext/monext-ios-sdk
-           \`\`\`  
-        
-        3. **Specify the Version:**  
-           Use version \`$VERSION\` or later.
-
-        ### 📦 Contenu de la release
-        - Monext.xcframework
-        - Archive zip
-
-        ---
-        **Build Date:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')
-        **Commit:** \`${{ github.sha }}\`
-        EOF
-
-    - name: Create Release and Upload Assets
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: v${{ needs.build.outputs.version }}
-        name: 🚀 Monext v${{ needs.build.outputs.version }}
-        body_path: release-notes.md
-        draft: false
-        prerelease: false
-        files: |
-          Monext-${{ needs.build.outputs.version }}.zip
-          dist/Monext.xcframework
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.build.outputs.version }}
+          name: 🚀 Monext v${{ needs.build.outputs.version }}
+          body_path: release-notes.md
+          draft: false
+          prerelease: false
+          files: |
+            Monext-${{ needs.build.outputs.version }}.zip
+            dist/Monext.xcframework
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   notify:
     needs: [build, release]
@@ -228,7 +228,7 @@ jobs:
             ICON_COLOR="Good"
             ICON="CheckmarkStarburst"
             STATUS_TEXT="✅ Success"
-            
+          
             if [[ "$RELEASE_RESULT" == "success" ]]; then
               EXTRA_MESSAGE="Publication sur Github Releases réussie."
               RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/v${VERSION}"
@@ -250,7 +250,7 @@ jobs:
             STATUS_TEXT="❌ Échec"
             EXTRA_MESSAGE="Échec lors du processus de ${NOTIFICATION_TYPE}."
             RELEASE_ACTION=""
-            
+          
             echo "❌ Échec du ${NOTIFICATION_TYPE}"
           else
             ICON_COLOR="Warning"
@@ -258,7 +258,7 @@ jobs:
             STATUS_TEXT="⚠️ Statut inconnu"
             EXTRA_MESSAGE="Le statut du workflow est indéterminé."
             RELEASE_ACTION=""
-            
+          
             echo "⚠️ Statut inconnu"
           fi
           
