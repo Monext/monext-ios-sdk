@@ -155,6 +155,8 @@ struct ContentScreen: View {
                             print("paymentFailure")
                         case .paymentCanceled:
                             print("paymentCanceled")
+                        case .paymentSheetDismissedByUser:
+                            print("paymentSheetDismissedByUser")
                         }
                     }
                     .padding(8)
