@@ -5,7 +5,10 @@ import PackageDescription
 let package = Package(
     name: "Monext",
     defaultLocalization: "en",
-    platforms: [.iOS(.v16)],
+    platforms: [
+        .iOS(.v16),
+        .macOS(.v13)
+    ],
     products: [
         .library(
             name: "Monext",
@@ -18,18 +21,37 @@ let package = Package(
         .package(url: "https://github.com/ios-3ds-sdk/SPM.git", exact: "2.6.00")
     ],
     targets: [
+
+        // MARK: - Executable du plugin
+        .executableTarget(
+            name: "InjectSecretsExecutable"
+        ),
+
+        // MARK: - Build plugin
+        .plugin(
+            name: "InjectSecrets",
+            capability: .buildTool(),
+            dependencies: ["InjectSecretsExecutable"]
+        ),
+
+        // MARK: - SDK principal
         .target(
             name: "Monext",
             dependencies: [
                 .product(name: "ThreeDS_SDK", package: "SPM"),
             ],
-            path: "Sources",
+            path: "Sources/Monext",
             resources: [
-               .process("Monext/AppMetadata.plist"),
-               .process("Monext/Resources/Images.xcassets"),
-               .process("Monext/Resources/Localizable.xcstrings")
-           ]
+                .process("AppMetadata.plist"),
+                .process("Resources/Images.xcassets"),
+                .process("Resources/Localizable.xcstrings")
+            ],
+            plugins: [
+                "InjectSecrets"
+            ]
         ),
+
+        // MARK: - Tests
         .testTarget(
             name: "MonextTests",
             dependencies: [
@@ -37,8 +59,8 @@ let package = Package(
                 .product(name: "ViewInspector", package: "ViewInspector")
             ],
             resources: [
-               .process("API/TestResources")
-           ]
+                .process("API/TestResources")
+            ]
         ),
     ]
 )

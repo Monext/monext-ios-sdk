@@ -21,29 +21,50 @@ jobs:
 
       - name: Create symlink for compatibility
         run: |
-         mkdir -p ${{ github.workspace }}/../
-         ln -s ${{ github.workspace }} ${{ github.workspace }}/../Monext
-         
-      - name: Setup Swift 6.2.0
+          mkdir -p ${{ github.workspace }}/../
+          ln -s ${{ github.workspace }} ${{ github.workspace }}/../Monext
+
+      - name: Setup Xcode 26.2
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: '26.2'
-      
+
       - name: Install xcresultparser
         run: |
           brew install xcresultparser
+
+      - name: Build plugin executable for macOS host
+        run: |
+          xcodebuild build \
+            -scheme InjectSecretsExecutable \
+            -configuration Debug \
+            -destination "platform=macOS,arch=arm64" \
+            -derivedDataPath ~/SharedDerivedData
 
       - name: Install SonarQube Scanner
         run: |
           wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-6.2.1.4610.zip
           unzip sonar-scanner-cli-6.2.1.4610.zip
           echo "${PWD}/sonar-scanner-6.2.1.4610/bin" >> $GITHUB_PATH
-      
+
       - name: Execute Coverage
+        env:
+          NETCETERA_API_KEY: "ta_clé_ici"
         run: |
           set -o pipefail
-          xcodebuild test -sdk ${{ matrix.sdk }} -scheme "Monext" -destination '${{ matrix.destination }}' -enableCodeCoverage YES -resultBundlePath sdk.xcresult -quiet
-          xcodebuild test -project ./Example/Example.xcodeproj -scheme Example -destination '${{ matrix.destination }}' -enableCodeCoverage YES -resultBundlePath ./example.xcresult
+          xcodebuild test \
+            -sdk ${{ matrix.sdk }} \
+            -scheme "Monext" \
+            -destination '${{ matrix.destination }}' \
+            -enableCodeCoverage YES \
+            -resultBundlePath sdk.xcresult \
+            -derivedDataPath ~/SharedDerivedData
+          xcodebuild test \
+            -project ./Example/Example.xcodeproj \
+            -scheme Example \
+            -destination '${{ matrix.destination }}' \
+            -enableCodeCoverage YES \
+            -resultBundlePath ./example.xcresult
           xcrun xcresulttool merge sdk.xcresult example.xcresult --output-path=results.xcresult
           xcresultparser -o xml --coverage results.xcresult > sonarqube-generic-coverage.xml
 
