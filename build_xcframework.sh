@@ -59,11 +59,41 @@ build_framework() {
   # Copy Bundle
   bundle_dir="$product_path/${PACKAGE}_$scheme.bundle"
   if [ -d "$bundle_dir" ]; then
-    cp -prv "$bundle_dir"/* "$framework_path/" || exit 17
+    cp -prv "$bundle_dir" "$framework_path/" || exit 17
   else
     echo "BUNDLE NOT FOUND!!!"
     read  -n 1 -p "Wait:" mainmenuinput
   fi
+
+  # Create Info.plist
+  VERSION=$(plutil -extract CFBundleShortVersionString raw Sources/Monext/AppMetadata.plist 2>/dev/null || echo "1.0.0")
+  cat > "$framework_path/Info.plist" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>$scheme</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.monext.sdk</string>
+    <key>CFBundleName</key>
+    <string>$scheme</string>
+    <key>CFBundlePackageType</key>
+    <string>FMWK</string>
+    <key>CFBundleShortVersionString</key>
+    <string>$VERSION</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>MinimumOSVersion</key>
+    <string>16.0</string>
+    <key>CFBundleSupportedPlatforms</key>
+    <array>
+        <string>iPhoneOS</string>
+    </array>
+</dict>
+</plist>
+EOF
+  echo "✅ Info.plist créé pour $scheme ($sdk)"
 }
 
 create_xcframework() {

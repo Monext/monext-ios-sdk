@@ -8,7 +8,7 @@
 import Foundation
 @preconcurrency import ThreeDS_SDK
 
-public enum ChallengeStatus: Sendable {
+public enum ChallengeStatus: @unchecked Sendable {
     case completed(ThreeDS_SDK.CompletionEvent)
     case cancelled
     case timedout
