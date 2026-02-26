@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-15
     outputs:
       version: ${{ steps.get-version.outputs.version }}
       should-release: ${{ steps.check-release.outputs.should-release }}
@@ -17,10 +17,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Xcode 16.2
+      - name: Set up Xcode 26.2
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '16.2'
+          xcode-version: '26.2'
 
       - name: Download iOS and iOS Simulator Platforms
         run: |
@@ -119,7 +119,7 @@ jobs:
 
   release:
     needs: build
-    runs-on: macos-latest
+    runs-on: macos-15
     if: needs.build.outputs.should-release == 'true'
 
     steps:
