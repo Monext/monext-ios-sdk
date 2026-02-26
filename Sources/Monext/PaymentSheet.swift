@@ -26,6 +26,9 @@ public enum PaymentSheetResult {
     
     /// The provided token has expired
     case tokenExpired
+    
+    /// The user close the payment sheet
+    case paymentSheetDismissedByUser
 }
 
 struct PaymentSheet: View {
@@ -54,7 +57,7 @@ struct PaymentSheet: View {
             
             VStack(spacing: 0) {
                 
-                PaymentSheetHeaderView(isPresented: $isPresented)
+                PaymentSheetHeaderView(isPresented: $isPresented, onResult: onResult)
                 
                 switch uiState {
                     

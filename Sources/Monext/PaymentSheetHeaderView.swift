@@ -11,6 +11,8 @@ struct PaymentSheetHeaderView: View {
     
     @Binding var isPresented: Bool
     
+    let onResult: (PaymentSheetResult) -> Void
+    
     @State private var isPresentedExitDialog = false
     
     @EnvironmentObject var sessionStore: SessionStateStore
@@ -27,7 +29,10 @@ struct PaymentSheetHeaderView: View {
             .modifier(
                 ExitPaymentDialog(
                     isPresented: $isPresentedExitDialog,
-                    onExit: { isPresented = false }
+                    onExit: {
+                        onResult(.paymentSheetDismissedByUser)
+                        isPresented = false
+                    }
                 )
             )
             
@@ -58,10 +63,4 @@ struct PaymentSheetHeaderView: View {
             isPresented = false
         }
     }
-}
-
-#Preview {
-    PaymentSheetHeaderView(isPresented: .constant(true))
-        .background(Color(white: 0.8))
-        .environmentObject(PreviewData.sessionStore)
 }
