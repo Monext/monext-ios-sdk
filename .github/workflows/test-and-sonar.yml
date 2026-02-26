@@ -23,6 +23,11 @@ jobs:
         run: |
          mkdir -p ${{ github.workspace }}/../
          ln -s ${{ github.workspace }} ${{ github.workspace }}/../Monext
+         
+      - name: Setup Swift 6.2.0
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.2'
       
       - name: Install xcresultparser
         run: |
