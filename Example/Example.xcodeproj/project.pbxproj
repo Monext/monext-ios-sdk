@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5ED276AF2F2A6B90007E91D0 /* Monext in Frameworks */ = {isa = PBXBuildFile; productRef = 5ED276AE2F2A6B90007E91D0 /* Monext */; };
 		E075B1FD2E0414C400417D6F /* Monext in Frameworks */ = {isa = PBXBuildFile; productRef = E075B1FC2E0414C400417D6F /* Monext */; };
 		E0A0F2222E69D84600658ED3 /* Monext in Embed Frameworks */ = {isa = PBXBuildFile; productRef = E075B1FC2E0414C400417D6F /* Monext */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
@@ -88,6 +89,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E075B1FD2E0414C400417D6F /* Monext in Frameworks */,
+				5ED276AF2F2A6B90007E91D0 /* Monext in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -161,6 +163,7 @@
 			name = Example;
 			packageProductDependencies = (
 				E075B1FC2E0414C400417D6F /* Monext */,
+				5ED276AE2F2A6B90007E91D0 /* Monext */,
 			);
 			productName = Example;
 			productReference = D99B79E32CA4E2B30010B87C /* Example.app */;
@@ -625,6 +628,10 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		5ED276AE2F2A6B90007E91D0 /* Monext */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Monext;
+		};
 		E075B1FC2E0414C400417D6F /* Monext */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Monext;
