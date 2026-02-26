@@ -74,3 +74,5 @@ Example/Config/Secrets.xcconfig
 Sources/Monext/AppMetadata.plist
 Example/fastlane/report.xml
 /dist
+.env.local
+Sources/Monext/APIConfig.swift
