@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.2
 
 import PackageDescription
 
@@ -14,8 +14,8 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/nalexn/ViewInspector.git", from: "0.9.0"),
-        .package(url: "https://github.com/ios-3ds-sdk/SPM.git", exact: "2.5.30")
+        .package(url: "https://github.com/nalexn/ViewInspector.git", from: "0.10.3"),
+        .package(url: "https://github.com/ios-3ds-sdk/SPM.git", exact: "2.6.00")
     ],
     targets: [
         .target(
