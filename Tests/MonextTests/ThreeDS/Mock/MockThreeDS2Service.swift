@@ -130,9 +130,12 @@ class MockThreeDS2Service: NSObject, ThreeDS2Service, @unchecked Sendable {
         if let tx = transactionToReturn {
             return tx
         } else {
-            // Avoid constructing SDK Transaction types that may be unavailable in test target.
             throw ThreeDS2Error.SDKRuntime(message: "No transaction configured on MockThreeDS2Service", errorCode: nil, cause: nil)
         }
+    }
+
+    func createTransaction(directoryServerId: String, messageVersion: String?, additionalParameters: [String: String]?) throws -> any ThreeDS_SDK.Transaction {
+        return try createTransaction(directoryServerId: directoryServerId, messageVersion: messageVersion)
     }
 
     func getWarnings() throws -> [ThreeDS_SDK.Warning] {
