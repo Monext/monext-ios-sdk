@@ -52,7 +52,7 @@ jobs:
       - name: Get version from plist
         id: get-version
         run: |
-          VERSION=$(plutil -extract CFBundleShortVersionString raw Sources/Monext/Resources/AppMetadata.plist)
+          VERSION=$(plutil -extract CFBundleShortVersionString raw Sources/Monext/AppMetadata.plist)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "📦 Version détectée: $VERSION"
 
