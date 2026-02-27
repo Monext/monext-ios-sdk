@@ -29,7 +29,17 @@ build_framework() {
   echo "Destination: $dest"
   echo
 
-  (xcodebuild -scheme "$scheme" -configuration "$CONFIGURATION" -destination "$dest" -sdk "$sdk" -derivedDataPath "$BUILD_DIR" SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES OTHER_SWIFT_FLAGS="-no-verify-emitted-module-interface") || exit 12
+  # La variable NETCETERA_API_KEY est transmise depuis l'environnement CI
+  # ou depuis .env.local en local — le build plugin InjectSecrets s'en charge
+  (xcodebuild \
+    -scheme "$scheme" \
+    -configuration "$CONFIGURATION" \
+    -destination "$dest" \
+    -sdk "$sdk" \
+    -derivedDataPath "$BUILD_DIR" \
+    SKIP_INSTALL=NO \
+    BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+    OTHER_SWIFT_FLAGS="-no-verify-emitted-module-interface") || exit 12
 
   product_path="$BUILD_DIR/Build/Products/$CONFIGURATION-$sdk"
   framework_path="$BUILD_DIR/Build/Products/$CONFIGURATION-$sdk/PackageFrameworks/$scheme.framework"
@@ -56,14 +66,43 @@ build_framework() {
   mkdir "$modules_path/$scheme.swiftmodule"
   cp -pv "$product_path/$scheme.swiftmodule"/*.* "$modules_path/$scheme.swiftmodule/" || exit 16
 
-  # Copy Bundle
+  # Copy Bundle (copie le .bundle entier, pas son contenu)
   bundle_dir="$product_path/${PACKAGE}_$scheme.bundle"
   if [ -d "$bundle_dir" ]; then
-    cp -prv "$bundle_dir"/* "$framework_path/" || exit 17
+    cp -prv "$bundle_dir" "$framework_path/" || exit 17
   else
-    echo "BUNDLE NOT FOUND!!!"
-    read  -n 1 -p "Wait:" mainmenuinput
+    echo "⚠️ BUNDLE NOT FOUND at $bundle_dir"
   fi
+
+  # Create Info.plist
+  VERSION=$(plutil -extract CFBundleShortVersionString raw Sources/Monext/Resources/AppMetadata.plist 2>/dev/null || echo "1.0.0")
+  cat > "$framework_path/Info.plist" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>$scheme</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.monext.sdk</string>
+    <key>CFBundleName</key>
+    <string>$scheme</string>
+    <key>CFBundlePackageType</key>
+    <string>FMWK</string>
+    <key>CFBundleShortVersionString</key>
+    <string>$VERSION</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>MinimumOSVersion</key>
+    <string>16.0</string>
+    <key>CFBundleSupportedPlatforms</key>
+    <array>
+        <string>iPhoneOS</string>
+    </array>
+</dict>
+</plist>
+EOF
+  echo "✅ Info.plist créé pour $scheme ($sdk)"
 }
 
 create_xcframework() {
@@ -100,8 +139,15 @@ rm -rf "$BUILD_DIR"
 rm -rf "$DIST_DIR"
 
 reset_package_type
-
 set_package_type_as_dynamic "$PACKAGE"
+
+echo "🔧 Building plugin executable for macOS host..."
+xcodebuild build \
+  -scheme InjectSecretsExecutable \
+  -configuration Release \
+  -derivedDataPath "$BUILD_DIR" \
+  -destination "platform=macOS" || exit 10
+
 build_framework "$PACKAGE" "$SIMULATOR_SDK"
 build_framework "$PACKAGE" "$DEVICE_SDK"
 create_xcframework "$PACKAGE" "$SIMULATOR_SDK" "$DEVICE_SDK"

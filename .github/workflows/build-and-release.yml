@@ -38,12 +38,12 @@ jobs:
           IPHONESIMULATOR_SDK=$(xcrun --sdk iphonesimulator --show-sdk-path)
           echo "Device SDK: $IPHONEOS_SDK"
           echo "Simulator SDK: $IPHONESIMULATOR_SDK"
-          
-          if [ !  -d "$IPHONEOS_SDK" ]; then
+
+          if [ ! -d "$IPHONEOS_SDK" ]; then
             echo "❌ iOS SDK not found at $IPHONEOS_SDK"
             exit 1
           fi
-          
+
           if [ ! -d "$IPHONESIMULATOR_SDK" ]; then
             echo "❌ iOS Simulator SDK not found at $IPHONESIMULATOR_SDK"
             exit 1
@@ -52,7 +52,7 @@ jobs:
       - name: Get version from plist
         id: get-version
         run: |
-          VERSION=$(plutil -extract CFBundleShortVersionString raw Sources/Monext/AppMetadata.plist)
+          VERSION=$(plutil -extract CFBundleShortVersionString raw Sources/Monext/Resources/AppMetadata.plist)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "📦 Version détectée: $VERSION"
 
@@ -60,10 +60,8 @@ jobs:
         id: check-release
         run: |
           VERSION="${{ steps.get-version.outputs.version }}"
-          
-          # Vérifier si on est sur master/main
+
           if [[ "${{ github.ref }}" == "refs/heads/master" ]] || [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            # Vérifier si le tag existe déjà
             if git rev-parse "v$VERSION" >/dev/null 2>&1; then
               echo "should-release=false" >> $GITHUB_OUTPUT
               echo "🏷️ Tag v$VERSION existe déjà, pas de release"
@@ -72,21 +70,9 @@ jobs:
               echo "✨ Nouvelle version détectée: v$VERSION"
             fi
           else
-            # Pas sur master/main (PR ou autre branche)
             echo "should-release=false" >> $GITHUB_OUTPUT
             echo "🔧 Branche: ${{ github.ref_name }}, pas de release"
           fi
-
-      - name: Configure API Key
-        env:
-          NETCETERA_API_KEY: ${{ secrets.NETCETERA_API_KEY }}
-        run: |
-          if [ -z "$NETCETERA_API_KEY" ]; then
-            echo "⚠️ NETCETERA_API_KEY secret non configuré"
-            exit 1
-          fi
-          sed -i '' "s/\${NETCETERA_API_KEY}/$NETCETERA_API_KEY/g" Sources/Monext/AppMetadata.plist
-          echo "🔑 Clé API configurée"
 
       - name: Clean build folders
         run: |
@@ -98,7 +84,13 @@ jobs:
           swift package show-dependencies
 
       - name: Build XCFramework
+        env:
+          NETCETERA_API_KEY: ${{ secrets.NETCETERA_API_KEY }}
         run: |
+          if [ -z "$NETCETERA_API_KEY" ]; then
+            echo "⚠️ NETCETERA_API_KEY secret non configuré"
+            exit 1
+          fi
           chmod +x build_xcframework.sh
           bash -x build_xcframework.sh
 
@@ -146,30 +138,30 @@ jobs:
           fi
           cat > release-notes.md << EOF
           ## 🚀 Monext v$VERSION
-          
+
           ### 📋 Changements
           $COMMITS
-          
+
           ### 🔧 Installation
           Monext iOS SDK is available via [Swift Package Manager](https://www.swift.org/documentation/package-manager/).
-          
+
           ### Swift Package Manager
-          
-          1. **Add the Package Dependency:**  
+
+          1. **Add the Package Dependency:**
              Follow Apple's guide on [Adding Package Dependencies to Your App](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app).
-          
+
           2. **Enter the Repository URL:**
              \`\`\`
              https://github.com/Monext/monext-ios-sdk
-             \`\`\`  
-          
-          3. **Specify the Version:**  
+             \`\`\`
+
+          3. **Specify the Version:**
              Use version \`$VERSION\` or later.
-          
+
           ### 📦 Contenu de la release
           - Monext.xcframework
           - Archive zip
-          
+
           ---
           **Build Date:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')
           **Commit:** \`${{ github.sha }}\`
@@ -204,8 +196,7 @@ jobs:
           RELEASE_RESULT="${{ needs.release.result }}"
           BRANCH="${{ github.ref_name }}"
           SHOULD_RELEASE="${{ needs.build.outputs.should-release }}"
-          
-          # Déterminer le statut global
+
           if [[ "$BUILD_RESULT" == "failure" ]]; then
             OVERALL_STATUS="failure"
             NOTIFICATION_TYPE="Build"
@@ -222,13 +213,12 @@ jobs:
             OVERALL_STATUS="unknown"
             NOTIFICATION_TYPE="Build"
           fi
-          
-          # Configuration selon le statut
+
           if [[ "$OVERALL_STATUS" == "success" ]]; then
             ICON_COLOR="Good"
             ICON="CheckmarkStarburst"
             STATUS_TEXT="✅ Success"
-          
+
             if [[ "$RELEASE_RESULT" == "success" ]]; then
               EXTRA_MESSAGE="Publication sur Github Releases réussie."
               RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/v${VERSION}"
@@ -237,12 +227,9 @@ jobs:
                 \"title\": \"🚀 Voir la release\",
                 \"url\": \"${RELEASE_URL}\"
               },"
-              echo "✅ Release v${VERSION} créée avec succès!"
-              echo "🔗 ${RELEASE_URL}"
             else
               EXTRA_MESSAGE="Build réussi sur la branche ${BRANCH} (pas de release créée)."
               RELEASE_ACTION=""
-              echo "✅ Build v${VERSION} réussi sur ${BRANCH} (should-release: ${SHOULD_RELEASE})"
             fi
           elif [[ "$OVERALL_STATUS" == "failure" ]]; then
             ICON_COLOR="Attention"
@@ -250,19 +237,14 @@ jobs:
             STATUS_TEXT="❌ Échec"
             EXTRA_MESSAGE="Échec lors du processus de ${NOTIFICATION_TYPE}."
             RELEASE_ACTION=""
-          
-            echo "❌ Échec du ${NOTIFICATION_TYPE}"
           else
             ICON_COLOR="Warning"
             ICON="Warning"
             STATUS_TEXT="⚠️ Statut inconnu"
             EXTRA_MESSAGE="Le statut du workflow est indéterminé."
             RELEASE_ACTION=""
-          
-            echo "⚠️ Statut inconnu"
           fi
-          
-          # Envoi de la notification Teams
+
           curl -X POST "${TEAMS_WEBHOOK_URL}" \
             -H "Content-Type: application/json" \
             -d @- << EOF
@@ -283,73 +265,31 @@ jobs:
                         {
                           "type": "Column",
                           "width": "auto",
-                          "height": "stretch",
-                          "items": [
-                            {
-                              "type": "Icon",
-                              "name": "${ICON}",
-                              "style": "Filled",
-                              "color": "${ICON_COLOR}"
-                            }
-                          ],
+                          "items": [{ "type": "Icon", "name": "${ICON}", "style": "Filled", "color": "${ICON_COLOR}" }],
                           "spacing": "None"
                         },
                         {
                           "type": "Column",
                           "width": "stretch",
-                          "items": [
-                            {
-                              "type": "TextBlock",
-                              "text": "Publication **SDK iOS** - ${STATUS_TEXT}",
-                              "wrap": true,
-                              "size": "Large",
-                              "weight": "Bolder"
-                            }
-                          ],
+                          "items": [{ "type": "TextBlock", "text": "Publication **SDK iOS** - ${STATUS_TEXT}", "wrap": true, "size": "Large", "weight": "Bolder" }],
                           "spacing": "Small"
                         }
                       ],
                       "spacing": "None"
                     },
-                    {
-                      "type": "TextBlock",
-                      "text": "_version ${VERSION}_",
-                      "wrap": true,
-                      "isSubtle": true,
-                      "spacing": "Small"
-                    },
+                    { "type": "TextBlock", "text": "_version ${VERSION}_", "wrap": true, "isSubtle": true, "spacing": "Small" },
                     {
                       "type": "FactSet",
                       "facts": [
-                        {
-                          "title": "Repository:",
-                          "value": "${{ github.repository }}"
-                        },
-                        {
-                          "title": "Branch/Tag:",
-                          "value": "${BRANCH}"
-                        },
-                        {
-                          "title": "Auteur:",
-                          "value": "${{ github.actor }}"
-                        },
-                        {
-                          "title": "Build Status:",
-                          "value": "${BUILD_RESULT}"
-                        },
-                        {
-                          "title": "Release Status:",
-                          "value": "${RELEASE_RESULT}"
-                        }
+                        { "title": "Repository:", "value": "${{ github.repository }}" },
+                        { "title": "Branch/Tag:", "value": "${BRANCH}" },
+                        { "title": "Auteur:", "value": "${{ github.actor }}" },
+                        { "title": "Build Status:", "value": "${BUILD_RESULT}" },
+                        { "title": "Release Status:", "value": "${RELEASE_RESULT}" }
                       ],
                       "separator": true
                     },
-                    {
-                      "type": "TextBlock",
-                      "text": "${EXTRA_MESSAGE}",
-                      "wrap": true,
-                      "separator": true
-                    }
+                    { "type": "TextBlock", "text": "${EXTRA_MESSAGE}", "wrap": true, "separator": true }
                   ],
                   "actions": [
                     ${RELEASE_ACTION}
@@ -364,10 +304,7 @@ jobs:
             ]
           }
           EOF
-          
-          echo "✅ Notification ${NOTIFICATION_TYPE} (${OVERALL_STATUS}) envoyée avec succès"
-          
-          # Faire échouer le step si le statut global est en échec
+
           if [[ "$OVERALL_STATUS" == "failure" ]]; then
             exit 1
           fi

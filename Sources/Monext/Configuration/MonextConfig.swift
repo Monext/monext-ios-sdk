@@ -19,10 +19,15 @@ public struct MonextConfig {
             return dict
         }
     
-    // MARK: - Monext Configuration
-    public static var NetecteraAPIKey: String {
-        loadPlist()?["NetceteraAPIKey"] as? String ?? ""
-    }
+    // MARK: - Sensitive (embarquée dans le binaire via build plugin)
+
+     /// Clé API Netcetera pour le 3DS SDK.
+     /// Générée à la compilation depuis .env.local ou les variables d'environnement CI.
+     /// Non visible dans le bundle distribué.
+     public static var NetecteraAPIKey: String {
+         APIConfig.netecteraAPIKey
+     }
+
     
     
 }
