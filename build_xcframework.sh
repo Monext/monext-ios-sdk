@@ -75,7 +75,7 @@ build_framework() {
   fi
 
   # Create Info.plist
-  VERSION=$(plutil -extract CFBundleShortVersionString raw Sources/Monext/Resources/AppMetadata.plist 2>/dev/null || echo "1.0.0")
+  VERSION=$(plutil -extract CFBundleShortVersionString raw Sources/Monext/AppMetadata.plist 2>/dev/null || echo "1.0.0")
   cat > "$framework_path/Info.plist" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
