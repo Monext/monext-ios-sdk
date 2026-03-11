@@ -110,11 +110,11 @@ struct ApplePayButton: View {
                 onPaymentAuthorizationChange: authorizationChange
             ) {
                 EmptyView()
-//                Text("Apple Pay not supported")
             }
             .frame(height: 48)
             .payWithApplePayButtonStyle(sessionStore.applePayConfiguration.buttonStyle)
             .clipShape(RoundedRectangle(cornerRadius: sessionStore.appearance.buttonRadius))
+            .modifier(DisableCardArtIfAvailable())
         }
     }
 }
