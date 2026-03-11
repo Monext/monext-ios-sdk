@@ -97,8 +97,8 @@ jobs:
       - name: Prepare release bundle
         run: |
           VERSION="${{ steps.get-version.outputs.version }}"
-          zip -r "Monext-${VERSION}.zip" dist/Monext.xcframework -x "*.DS_Store*"
-          ls -l dist || true
+          (cd dist && zip -r "../Monext-${VERSION}.zip" Monext.xcframework -x "*.DS_Store*")
+          ls -l Monext-${VERSION}.zip
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -108,6 +108,14 @@ jobs:
             dist/Monext.xcframework
             Monext-${{ steps.get-version.outputs.version }}.zip
           retention-days: 90
+          
+      - name: Compute checksum
+        id: checksum
+        run: |
+          VERSION="${{ steps.get-version.outputs.version }}"
+          CHECKSUM=$(swift package compute-checksum "Monext-${VERSION}.zip")
+          echo "checksum=${CHECKSUM}" >> $GITHUB_OUTPUT
+          echo "Checksum: ${CHECKSUM}"
 
   release:
     needs: build
