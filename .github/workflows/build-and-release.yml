@@ -160,7 +160,7 @@ jobs:
 
           2. **Enter the Repository URL:**
              \`\`\`
-             https://github.com/Monext/monext-ios-sdk
+             https://github.com/Monext/monext-ios-sdk-spm
              \`\`\`
 
           3. **Specify the Version:**
