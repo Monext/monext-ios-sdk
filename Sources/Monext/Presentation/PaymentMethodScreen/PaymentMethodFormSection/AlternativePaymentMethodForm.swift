@@ -89,7 +89,8 @@ struct AlternativePaymentMethodForm: View {
                     keyboardType: getKeyboardType(for: field),
                     focusedState: $focusedField,
                     focusedField: field.id,
-                    placeholder: field.placeholder
+                    placeholder: field.placeholder,
+                    isScreenshotProtected: field.secured ?? false
                 )
                 .padding(.vertical, 8)
             default:
