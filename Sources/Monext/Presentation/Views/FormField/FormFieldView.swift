@@ -38,6 +38,14 @@ struct FormFieldView<ID: Hashable>: View {
     
     @EnvironmentObject var sessionStore: SessionStateStore
     
+    
+    /// Active la protection contre les screenshots et screen recordings iOS natifs.
+    /// À utiliser sur les champs sensibles : PAN, CVV, etc.
+    var isScreenshotProtected: Bool = false
+    private var shouldProtectSensitiveData: Bool {
+        isScreenshotProtected && (sessionStore.env == .production || sessionStore.env == .sandbox)
+    }
+    
     private var config: Appearance {
         sessionStore.appearance
     }
@@ -117,6 +125,11 @@ struct FormFieldView<ID: Hashable>: View {
                         .tint(config.textfieldTextColor)
                         .keyboardType(keyboardType)
                         .textFieldStyle(MonextTextFieldStyle(config: config))
+                        // Cache les champs uniquement en Production et Homologation
+                        .privacySensitive(shouldProtectSensitiveData)
+                        .if(shouldProtectSensitiveData) {
+                            $0.screenshotProtected()
+                        }
                     
                     if onTappedInfoAccessory != nil {
                         Image(moduleImage: "ic.i.circle.filled")
@@ -191,7 +204,8 @@ struct FormFieldView<ID: Hashable>: View {
             keyboardType: .numberPad,
             focusedState: FocusState<CardField?>().projectedValue,
             focusedField: .cardNumber,
-            placeholder: "0000 0000 0000 0000"
+            placeholder: "0000 0000 0000 0000",
+            isScreenshotProtected: true
         )
         .padding()
         
@@ -205,7 +219,8 @@ struct FormFieldView<ID: Hashable>: View {
             keyboardType: .numberPad,
             focusedState: FocusState<CardField?>().projectedValue,
             focusedField: .cvv,
-            placeholder: "123"
+            placeholder: "123",
+            isScreenshotProtected: true
         )
         .padding()
         
