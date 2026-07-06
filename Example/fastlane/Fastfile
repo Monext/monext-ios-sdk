@@ -5,6 +5,9 @@ lane :testflight do
     key_content: ENV["APP_STORE_CONNECT_API_KEY_CONTENT"],
     is_key_content_base64: true
   )
+  
+  build_number = ENV["GITHUB_RUN_NUMBER"] || "1"
+  increment_build_number(build_number: build_number)
 
   build_app(
     scheme: "Example",
