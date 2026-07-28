@@ -83,4 +83,17 @@ final class CardFormViewModelTests: XCTestCase {
         
         XCTAssertFalse(viewModel.showSaveCard)
     }
+    
+    // MARK: - Tests for saveCard default
+
+    @MainActor
+    func testSaveCardDefaultsToFalseAtInit() {
+        // Le pré-cochage ne se fait que dans le sink $issuer, jamais atteint tant
+        // qu'aucun numéro n'est saisi. Au montage saveCard reste à false.
+        let viewModel = CardFormTestHelper.makeCardFormViewModel(
+            options: CardFormTestHelper.TestOptions.saveCardOnly
+        )
+
+        XCTAssertFalse(viewModel.saveCard)
+    }
 }
