@@ -5,9 +5,11 @@ lane :testflight do
     key_content: ENV["APP_STORE_CONNECT_API_KEY_CONTENT"],
     is_key_content_base64: true
   )
-  
-  build_number = ENV["GITHUB_RUN_NUMBER"] || "1"
-  increment_build_number(build_number: build_number)
+
+  build_number = latest_testflight_build_number(
+    api_key: api_key,
+    app_identifier: "com.monext.Example"
+  ) + 1
 
   build_app(
     scheme: "Example",
