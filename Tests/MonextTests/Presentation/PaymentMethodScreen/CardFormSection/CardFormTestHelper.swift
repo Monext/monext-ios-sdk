@@ -45,6 +45,19 @@ final class CardFormTestHelper {
         )
     }
     
+    /// Crée un CardFormViewModel avec plusieurs méthodes de paiement
+    static func makeCardFormViewModel(
+        optionsPerMethod: [[String]],
+        sessionToken: String = "test",
+        paymentAPI: MockPaymentAPI = MockPaymentAPI()
+    ) -> CardFormViewModel {
+        CardFormViewModel(
+            paymentAPI: paymentAPI,
+            sessionToken: sessionToken,
+            paymentMethods: optionsPerMethod.map { makePaymentMethod(options: $0) }
+        )
+    }
+    
     /// Crée un PaymentMethodData avec les paramètres spécifiés
     /// - Parameters:
     ///   - options: Liste des options à inclure

@@ -131,6 +131,14 @@ final class CardFormViewModel: ObservableObject {
                 )
             }
             .store(in: &subscribers)
+        
+        let saveCardDefaults = paymentMethods
+               .filter { ($0.options ?? []).contains(PaymentMethodData.KnownOptionsKey.saveCard.rawValue) }
+               .map { $0.additionalData.savePaymentDataChecked ?? false }
+
+           if !saveCardDefaults.isEmpty, saveCardDefaults.allSatisfy({ $0 }) {
+               self.saveCard = true
+           }
     }
     
     func nextFocus(_ focusedField: CardField) -> CardField? {

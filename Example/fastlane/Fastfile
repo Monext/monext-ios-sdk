@@ -1,17 +1,25 @@
-default_platform(:ios)
+lane :testflight do
+  api_key = app_store_connect_api_key(
+    key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+    issuer_id: ENV["APP_STORE_CONNECT_API_ISSUER_ID"],
+    key_content: ENV["APP_STORE_CONNECT_API_KEY_CONTENT"],
+    is_key_content_base64: true
+  )
 
-platform :ios do
-  desc "Build and upload to TestFlight"
-  lane :testflight do
-    build_app(
-      scheme: "Example"
-    )
-    upload_to_testflight(
-        api_key: app_store_connect_api_key(
-            key_id: ENV['APPSTORE_KEY_ID'],
-            issuer_id: ENV['APPSTORE_ISSUER_ID'],
-            key_content: ENV['APPSTORE_KEY_CONTENT']
-        )
-    )
-  end
+  build_number = latest_testflight_build_number(
+    api_key: api_key,
+    app_identifier: "com.monext.Example"
+  ) + 1
+
+  build_app(
+    scheme: "Example",
+    export_method: "app-store",
+    export_options: {
+      signingStyle: "manual",
+      provisioningProfiles: {
+        "com.monext.Example" => "Example - TestFlight CI"
+      }
+    }
+  )
+  upload_to_testflight(api_key: api_key)
 end
