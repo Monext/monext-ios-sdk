@@ -16,6 +16,11 @@ public struct MnxtSDKContext {
         self.config = config
         self.appearance = appearance
         self.applePayConfiguration = applePayConfiguration
+        
+        // Préchargement hors du main thread : le check Frida peut bloquer jusqu'à 300 ms
+        Task.detached(priority: .utility) {
+            _ = RootDetector.shared.isCompromised()
+        }
     }
 }
     
