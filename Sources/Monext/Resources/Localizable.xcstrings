@@ -114,6 +114,23 @@
         }
       }
     },
+    "Close" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer"
+          }
+        }
+      }
+    },
     "Congratulations" : {
       "localizations" : {
         "fr" : {
@@ -588,6 +605,23 @@
         }
       }
     },
+    "Unsecured device" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unsecured device"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appareil non sécurisé"
+          }
+        }
+      }
+    },
     "View all my Wallet" : {
       "localizations" : {
         "fr" : {
@@ -680,6 +714,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "La tua carta ha due reti diverse. Scegli quella che preferisci utilizzare."
+          }
+        }
+      }
+    },
+    "Your device does not meet the security requirements to process a payment." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your device does not meet the security requirements to process a payment."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre appareil ne répond pas aux exigences de sécurité requises pour effectuer un paiement."
           }
         }
       }
