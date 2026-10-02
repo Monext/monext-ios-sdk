@@ -13,7 +13,7 @@ jobs:
       matrix:
         include:
           - sdk: iphoneos
-            destination: platform=iOS Simulator,OS=18.5,name=iPhone 16
+            destination: platform=iOS Simulator,OS=latest,name=iPhone 17 Pro
 
     steps:
       - uses: actions/checkout@v4
@@ -29,6 +29,15 @@ jobs:
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: '26.2'
+
+      - name: Install iOS Simulator runtime
+        run: |
+          xcodebuild -downloadPlatform iOS
+          if ! xcrun simctl list devices available | grep -q "iPhone 17 Pro ("; then
+            RUNTIME=$(xcrun simctl list runtimes available | grep -E '^iOS' | tail -1 | awk '{print $NF}')
+            xcrun simctl create "iPhone 17 Pro" "iPhone 17 Pro" "$RUNTIME"
+          fi
+          xcrun simctl list devices available | grep "iPhone 17 Pro"
 
       - name: Install xcresultparser
         run: |
