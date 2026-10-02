@@ -256,10 +256,18 @@ struct PaymentMethodData: Decodable, Hashable {
 struct PaymentMethodForm: Decodable, Hashable {
     var displayButton: Bool
     var description: String?
-    var buttonText: String?
+    var button: PaymentMethodButton?
     var formFields: [PaymentMethodFormField]?
     var formType: String?
 }
+
+struct PaymentMethodButton: Decodable, Hashable {
+    var buttonText: String?
+    var buttonType: String?
+    var key: String?
+    var title: String?
+}
+
 struct PaymentMethodFormField: Decodable, Hashable, Identifiable {
     var content: String?
     var formFieldType: String?

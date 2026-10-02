@@ -37,7 +37,7 @@ struct PayButton: View {
                         .frame(width: 24, height: 24)
                 } else {
                     if let method = method, let title = method.data?.logo?.title {
-                        Text(method.data?.form?.buttonText ?? "Continue to \(title)")
+                        Text(method.data?.form?.button?.buttonText ?? "Continue to \(title)")
                             .font(config.fonts.bold18)
                     } else {
                         Text("Pay \(amount ?? "")")
