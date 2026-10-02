@@ -31,7 +31,14 @@ final class PayButtonTests: XCTestCase {
                 form: PaymentMethodForm(
                     displayButton: true,
                     description: "By choosing this payment method, you select your bank, then validate your payment. There's no need to register - your bank account is all you need to pay.",
-                    buttonText: "Continue to iDeal"
+                    button: PaymentMethodButton(
+                        buttonText: "Continue to iDeal",
+                        buttonType: "DEFAULT",
+                        key: "apm-btn-key",
+                        title: nil
+                    ),
+                    formFields: nil,
+                    formType: nil
                 ),
                 hasLogo: true,
                 logo: PaymentMethodLogo(
