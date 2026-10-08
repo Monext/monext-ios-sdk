@@ -12,7 +12,7 @@ On te donne le numéro de version `X.Y.Z`. S'il manque, propose le patch suivant
 ## Ce qu'il faut savoir sur les dépôts
 
 - `Monext/monext-ios-sdk` contient les sources. La branche par défaut est `develop`, `main` ne reçoit que les versions publiées.
-- `Monext/monext-ios-sdk-spm` est le package binaire que les intégrateurs installent via SPM. Son `Package.swift` pointe vers le zip d'une release du premier dépôt. Demande son chemin local s'il n'est pas déjà dans la session.
+- `Monext/monext-ios-sdk-spm` (https://github.com/Monext/monext-ios-sdk-spm) est le package binaire que les intégrateurs installent via SPM. Son `Package.swift` pointe vers le zip d'une release du premier dépôt. Utilise la copie locale si elle existe à côté de ce dépôt (`../monext-ios-sdk-spm`), sinon clone-le à cet endroit.
 - La version du SDK est le `CFBundleShortVersionString` de `Sources/Monext/AppMetadata.plist`. Les tags sont au format `X.Y.Z`, sans préfixe `v`.
 - Le workflow `Build and Release` se lance à chaque push sur `main` : il lit la version dans le plist, construit le XCFramework et publie la release GitHub `X.Y.Z` avec `Monext-X.Y.Z.zip`.
 - Le workflow `Test and Sonar` ne tourne que sur `develop` (push et PR). Une PR vers `main` n'exécute donc aucun test : vérifie que `develop` est vert avant de partir de là.
