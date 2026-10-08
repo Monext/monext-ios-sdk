@@ -34,10 +34,10 @@ Commence toujours par regarder où en est la release (branches, PR, tags, releas
 ## Limites
 
 - Vers `main`, une PR se merge avec un commit de merge (« Create a merge commit », ou `gh pr merge --merge`), jamais en squash ni en rebase. Un squash écrase les commits de `develop` en un seul : `main` et `develop` divergent et l'historique des tickets disparaît de `main`. Tu ne merges une PR que si on te le demande explicitement ; sinon, rappelle ce réglage à la personne qui merge.
-- Tu ne contournes pas une protection de branche. Si un push est refusé, passe par une PR et dis-le.
+- Tu ne contournes pas une protection de branche de ta propre initiative. Si un push est refusé, passe par une PR et dis-le.
 - Tu ne déplaces ni ne supprimes jamais un tag déjà poussé, et tu ne fais pas de force-push sur `main` ou `develop`. Les intégrateurs épinglent ces tags : un tag qui change de commit casse leurs builds. Si un tag est au mauvais endroit, explique la situation et laisse la décision à un humain.
 - Les messages de commit restent courts, dans le style de l'historique, sans mention d'outil ni de co-auteur.
-- Si `gh` n'est pas disponible ou pas authentifié, pousse la branche et donne un lien `compare/<base>...<branche>?expand=1&title=X.Y.Z` prêt à valider, plutôt que de chercher un autre moyen de t'authentifier.
+- Si `gh` n'est pas disponible ou pas authentifié, ne cherche pas un autre moyen de t'authentifier : pousse la branche ou le tag, puis donne un lien prêt à valider, `compare/<base>...<branche>?expand=1&title=X.Y.Z` pour une PR et `releases/new?tag=X.Y.Z&title=Version%20X.Y.Z` pour une release.
 
 ## Compte rendu
 
