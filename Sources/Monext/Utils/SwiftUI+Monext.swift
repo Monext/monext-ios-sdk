@@ -16,10 +16,11 @@ public extension View {
     func presentPaymentSheet(isPresented: Binding<Bool>, sessionToken: String, context: MnxtSDKContext, onResult: @escaping (PaymentSheetResult) -> Void) -> some View {
         return ModifiedContent(
             content: self,
-            modifier: PaymentSheetPresenter(
+            modifier: SecurityPaymentSheetPresenter(
                 isPresented: isPresented,
                 sessionToken: sessionToken,
                 sessionStateStore: .init(environment: context.environment, appearance: context.appearance, config: context.config, applePayConfiguration: context.applePayConfiguration),
+                detector: RootDetector.shared,
                 onResult: onResult
             )
         )
