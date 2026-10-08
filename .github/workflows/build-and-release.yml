@@ -1,20 +1,164 @@
+# Release manuelle du SDK : onglet Actions > Build and Release > Run workflow, depuis develop.
+#
+# Prérequis :
+# - une GitHub App installée sur ce dépôt et sur monext-ios-sdk-spm, avec le droit
+#   "Contents: Read and write", ajoutée aux exceptions des règles de branche
+#   (develop et main ici, main côté SPM) ;
+# - les secrets RELEASE_APP_ID et RELEASE_APP_PRIVATE_KEY de cette App.
 name: Build and Release
+run-name: Release ${{ inputs.version || inputs.bump }}
 
 on:
-  push:
-    branches: [ master, main ]
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Type de version (ignoré si une version est saisie)"
+        type: choice
+        default: patch
+        options:
+          - patch
+          - minor
+          - major
+      version:
+        description: "Version X.Y.Z (facultatif)"
+        type: string
+        required: false
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  SPM_REPOSITORY: monext-ios-sdk-spm
+  PLIST: Sources/Monext/AppMetadata.plist
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      previous: ${{ steps.version.outputs.previous }}
+      sha: ${{ steps.commit.outputs.sha }}
+
+    steps:
+      - name: Check launch conditions
+        env:
+          APP_ID: ${{ secrets.RELEASE_APP_ID }}
+          APP_PRIVATE_KEY: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+        run: |
+          if [[ "$GITHUB_REF" != "refs/heads/develop" ]]; then
+            echo "::error::Ce workflow se lance depuis develop, pas depuis $GITHUB_REF_NAME"
+            exit 1
+          fi
+          if [[ -z "$APP_ID" || -z "$APP_PRIVATE_KEY" ]]; then
+            echo "::error::Secrets RELEASE_APP_ID et RELEASE_APP_PRIVATE_KEY manquants"
+            exit 1
+          fi
+
+      - name: Generate release token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+
+      - name: Checkout develop
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Compute version
+        id: version
+        env:
+          BUMP: ${{ inputs.bump }}
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+
+          CURRENT=$(git tag -l | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1 || true)
+          if [[ -z "$CURRENT" ]]; then
+            CURRENT=$(python3 -c "import plistlib, sys; print(plistlib.load(open(sys.argv[1], 'rb'))['CFBundleShortVersionString'])" "$PLIST")
+          fi
+
+          if [[ -n "$INPUT_VERSION" ]]; then
+            VERSION="$INPUT_VERSION"
+            if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::Version invalide : '$VERSION' (format attendu X.Y.Z)"
+              exit 1
+            fi
+            HIGHEST=$(printf '%s\n%s\n' "$CURRENT" "$VERSION" | sort -V | tail -1)
+            if [[ "$VERSION" == "$CURRENT" || "$HIGHEST" != "$VERSION" ]]; then
+              echo "::error::La version $VERSION doit être supérieure à la version actuelle $CURRENT"
+              exit 1
+            fi
+          else
+            IFS=. read -r MAJOR MINOR PATCH <<< "$CURRENT"
+            case "$BUMP" in
+              major) VERSION="$((10#$MAJOR + 1)).0.0" ;;
+              minor) VERSION="$((10#$MAJOR)).$((10#$MINOR + 1)).0" ;;
+              *) VERSION="$((10#$MAJOR)).$((10#$MINOR)).$((10#$PATCH + 1))" ;;
+            esac
+          fi
+
+          if git rev-parse -q --verify "refs/tags/$VERSION" >/dev/null; then
+            echo "::error::Le tag $VERSION existe déjà"
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor origin/main HEAD; then
+            echo "::error::main contient des commits absents de develop : l'avance rapide est impossible"
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "previous=$CURRENT" >> "$GITHUB_OUTPUT"
+          echo "📦 Version actuelle: $CURRENT, version publiée: $VERSION"
+          echo "### Release $VERSION (version précédente : $CURRENT)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit version on develop
+        id: commit
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          read_version() {
+            python3 -c "import plistlib, sys; print(plistlib.load(open(sys.argv[1], 'rb'))['CFBundleShortVersionString'])" "$PLIST"
+          }
+
+          if [[ "$(read_version)" != "$VERSION" ]]; then
+            sed -i '/<key>CFBundleShortVersionString<\/key>/{n;s|<string>[^<]*</string>|<string>'"$VERSION"'</string>|;}' "$PLIST"
+            if [[ "$(read_version)" != "$VERSION" ]]; then
+              echo "::error::Impossible de mettre à jour la version dans $PLIST"
+              exit 1
+            fi
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Update version to $VERSION" -- "$PLIST"
+            git push origin HEAD:develop
+          else
+            echo "La version $VERSION est déjà dans $PLIST, pas de commit"
+          fi
+
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
   build:
+    needs: prepare
     runs-on: macos-15
     outputs:
-      version: ${{ steps.get-version.outputs.version }}
-      should-release: ${{ steps.check-release.outputs.should-release }}
+      checksum: ${{ steps.checksum.outputs.checksum }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          ref: ${{ needs.prepare.outputs.sha }}
           fetch-depth: 0
 
       - name: Set up Xcode 26.2
@@ -49,29 +193,15 @@ jobs:
             exit 1
           fi
 
-      - name: Get version from plist
-        id: get-version
+      - name: Check version in plist
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
         run: |
-          VERSION=$(plutil -extract CFBundleShortVersionString raw Sources/Monext/AppMetadata.plist)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "📦 Version détectée: $VERSION"
-
-      - name: Check if release should be created
-        id: check-release
-        run: |
-          VERSION="${{ steps.get-version.outputs.version }}"
-
-          if [[ "${{ github.ref }}" == "refs/heads/master" ]] || [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            if git rev-parse "v$VERSION" >/dev/null 2>&1; then
-              echo "should-release=false" >> $GITHUB_OUTPUT
-              echo "🏷️ Tag v$VERSION existe déjà, pas de release"
-            else
-              echo "should-release=true" >> $GITHUB_OUTPUT
-              echo "✨ Nouvelle version détectée: v$VERSION"
-            fi
-          else
-            echo "should-release=false" >> $GITHUB_OUTPUT
-            echo "🔧 Branche: ${{ github.ref_name }}, pas de release"
+          PLIST_VERSION=$(plutil -extract CFBundleShortVersionString raw "$PLIST")
+          echo "📦 Version détectée: $PLIST_VERSION"
+          if [[ "$PLIST_VERSION" != "$VERSION" ]]; then
+            echo "::error::Le plist contient $PLIST_VERSION alors que la release attendue est $VERSION"
+            exit 1
           fi
 
       - name: Clean build folders
@@ -95,55 +225,79 @@ jobs:
           bash -x build_xcframework.sh
 
       - name: Prepare release bundle
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
         run: |
-          VERSION="${{ steps.get-version.outputs.version }}"
           (cd dist && zip -r "../Monext-${VERSION}.zip" Monext.xcframework -x "*.DS_Store*")
           ls -l Monext-${VERSION}.zip
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: monext-build-${{ steps.get-version.outputs.version }}-${{ github.run_number }}
+          name: monext-build-${{ needs.prepare.outputs.version }}-${{ github.run_number }}
           path: |
             dist/Monext.xcframework
-            Monext-${{ steps.get-version.outputs.version }}.zip
+            Monext-${{ needs.prepare.outputs.version }}.zip
           retention-days: 90
-          
+
       - name: Compute checksum
         id: checksum
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
         run: |
-          VERSION="${{ steps.get-version.outputs.version }}"
           CHECKSUM=$(swift package compute-checksum "Monext-${VERSION}.zip")
           echo "checksum=${CHECKSUM}" >> $GITHUB_OUTPUT
           echo "Checksum: ${CHECKSUM}"
 
-  release:
-    needs: build
-    runs-on: macos-15
-    if: needs.build.outputs.should-release == 'true'
+  publish:
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      PREVIOUS: ${{ needs.prepare.outputs.previous }}
+      SHA: ${{ needs.prepare.outputs.sha }}
 
     steps:
+      - name: Generate release token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          ref: ${{ needs.prepare.outputs.sha }}
           fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: monext-build-${{ needs.build.outputs.version }}-${{ github.run_number }}
+          name: monext-build-${{ needs.prepare.outputs.version }}-${{ github.run_number }}
+
+      - name: Fast-forward main and tag
+        run: |
+          set -euo pipefail
+
+          git push origin "$SHA:refs/heads/main"
+
+          EXISTING=$(git ls-remote origin "refs/tags/$VERSION" | cut -f1)
+          if [[ -z "$EXISTING" ]]; then
+            git tag "$VERSION" "$SHA"
+            git push origin "refs/tags/$VERSION"
+          elif [[ "$EXISTING" != "$SHA" ]]; then
+            echo "::error::Le tag $VERSION existe déjà sur un autre commit ($EXISTING)"
+            exit 1
+          fi
 
       - name: Generate Release Notes
-        id: release-notes
         run: |
           set -e
-          VERSION="${{ needs.build.outputs.version }}"
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          if [ -n "$LAST_TAG" ]; then
-            COMMITS=$(git log $LAST_TAG..HEAD --oneline --pretty=format:"- %s (%h)")
-          else
-            COMMITS=$(git log --oneline --pretty=format:"- %s (%h)" -10)
-          fi
+          COMMITS=$(git log "$PREVIOUS..$SHA" --oneline --pretty=format:"- %s (%h)")
           cat > release-notes.md << EOF
           ## 🚀 Monext v$VERSION
 
@@ -172,25 +326,112 @@ jobs:
 
           ---
           **Build Date:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')
-          **Commit:** \`${{ github.sha }}\`
+          **Commit:** \`$SHA\`
           EOF
 
       - name: Create Release and Upload Assets
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.build.outputs.version }}
-          name: 🚀 Monext v${{ needs.build.outputs.version }}
+          tag_name: ${{ needs.prepare.outputs.version }}
+          name: 🚀 Monext v${{ needs.prepare.outputs.version }}
           body_path: release-notes.md
           draft: false
           prerelease: false
           files: |
-            Monext-${{ needs.build.outputs.version }}.zip
+            Monext-${{ needs.prepare.outputs.version }}.zip
             dist/Monext.xcframework
+          token: ${{ steps.app-token.outputs.token }}
+
+  spm:
+    needs: [prepare, build, publish]
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      CHECKSUM: ${{ needs.build.outputs.checksum }}
+
+    steps:
+      - name: Generate release token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ env.SPM_REPOSITORY }}
+
+      - name: Checkout SPM repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/${{ env.SPM_REPOSITORY }}
+          ref: main
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Check published asset
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          ASSET="Monext-$VERSION.zip"
+          DIGEST=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$VERSION" \
+            --jq ".assets[] | select(.name == \"$ASSET\") | (.digest // \"absent\")")
+          if [[ -z "$DIGEST" ]]; then
+            echo "::error::$ASSET est introuvable dans la release $VERSION"
+            exit 1
+          fi
+          if [[ "$DIGEST" != "absent" && "$DIGEST" != "sha256:$CHECKSUM" ]]; then
+            echo "::error::Le checksum du build ($CHECKSUM) ne correspond pas à l'archive publiée ($DIGEST)"
+            exit 1
+          fi
+
+      - name: Update Package.swift
+        run: |
+          set -euo pipefail
+
+          URL="https://github.com/$GITHUB_REPOSITORY/releases/download/$VERSION/Monext-$VERSION.zip"
+          sed -i -E \
+            -e 's|url: "https://github.com/[^"]*/releases/download/[^"]*\.zip"|url: "'"$URL"'"|' \
+            -e 's|checksum: "[0-9a-f]{64}"|checksum: "'"$CHECKSUM"'"|' \
+            Package.swift
+
+          if ! grep -qF "url: \"$URL\"" Package.swift || ! grep -qF "checksum: \"$CHECKSUM\"" Package.swift; then
+            echo "::error::Impossible de mettre à jour l'URL et le checksum dans Package.swift"
+            exit 1
+          fi
+
+      - name: Commit, tag and release
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+
+          if ! git diff --quiet -- Package.swift; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Release $VERSION" -- Package.swift
+            git push origin HEAD:main
+          else
+            echo "Package.swift pointe déjà sur la version $VERSION, pas de commit"
+          fi
+
+          SHA=$(git rev-parse HEAD)
+          EXISTING=$(git ls-remote origin "refs/tags/$VERSION" | cut -f1)
+          if [[ -z "$EXISTING" ]]; then
+            git tag "$VERSION" "$SHA"
+            git push origin "refs/tags/$VERSION"
+          elif [[ "$EXISTING" != "$SHA" ]]; then
+            echo "::error::Le tag $VERSION existe déjà sur un autre commit ($EXISTING)"
+            exit 1
+          fi
+
+          SPM_FULL_NAME="$GITHUB_REPOSITORY_OWNER/$SPM_REPOSITORY"
+          if ! gh release view "$VERSION" --repo "$SPM_FULL_NAME" >/dev/null 2>&1; then
+            gh release create "$VERSION" --repo "$SPM_FULL_NAME" --title "Version $VERSION" --notes "" --verify-tag
+          fi
 
   notify:
-    needs: [build, release]
+    needs: [prepare, build, publish, spm]
     runs-on: ubuntu-latest
     if: always()
 
@@ -198,52 +439,51 @@ jobs:
       - name: Notify Build Status
         env:
           TEAMS_WEBHOOK_URL: ${{ secrets.URL_WEBHOOK_TEAMS }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+          PREPARE_RESULT: ${{ needs.prepare.result }}
+          BUILD_RESULT: ${{ needs.build.result }}
+          RELEASE_RESULT: ${{ needs.publish.result }}
+          SPM_RESULT: ${{ needs.spm.result }}
         run: |
-          VERSION="${{ needs.build.outputs.version }}"
-          BUILD_RESULT="${{ needs.build.result }}"
-          RELEASE_RESULT="${{ needs.release.result }}"
+          VERSION="${VERSION:-inconnue}"
           BRANCH="${{ github.ref_name }}"
-          SHOULD_RELEASE="${{ needs.build.outputs.should-release }}"
 
-          if [[ "$BUILD_RESULT" == "failure" ]]; then
+          if [[ "$PREPARE_RESULT" == "failure" ]]; then
+            OVERALL_STATUS="failure"
+            NOTIFICATION_TYPE="Préparation"
+          elif [[ "$BUILD_RESULT" == "failure" ]]; then
             OVERALL_STATUS="failure"
             NOTIFICATION_TYPE="Build"
           elif [[ "$RELEASE_RESULT" == "failure" ]]; then
             OVERALL_STATUS="failure"
             NOTIFICATION_TYPE="Release"
-          elif [[ "$RELEASE_RESULT" == "success" ]]; then
+          elif [[ "$SPM_RESULT" == "failure" ]]; then
+            OVERALL_STATUS="failure"
+            NOTIFICATION_TYPE="Mise à jour SPM"
+          elif [[ "$SPM_RESULT" == "success" ]]; then
             OVERALL_STATUS="success"
             NOTIFICATION_TYPE="Release"
-          elif [[ "$BUILD_RESULT" == "success" ]] && [[ "$SHOULD_RELEASE" == "false" ]]; then
-            OVERALL_STATUS="success"
-            NOTIFICATION_TYPE="Build (sans release)"
           else
             OVERALL_STATUS="unknown"
-            NOTIFICATION_TYPE="Build"
+            NOTIFICATION_TYPE="Release"
           fi
 
           if [[ "$OVERALL_STATUS" == "success" ]]; then
             ICON_COLOR="Good"
             ICON="CheckmarkStarburst"
             STATUS_TEXT="✅ Success"
-
-            if [[ "$RELEASE_RESULT" == "success" ]]; then
-              EXTRA_MESSAGE="Publication sur Github Releases réussie."
-              RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/v${VERSION}"
-              RELEASE_ACTION="{
-                \"type\": \"Action.OpenUrl\",
-                \"title\": \"🚀 Voir la release\",
-                \"url\": \"${RELEASE_URL}\"
-              },"
-            else
-              EXTRA_MESSAGE="Build réussi sur la branche ${BRANCH} (pas de release créée)."
-              RELEASE_ACTION=""
-            fi
+            EXTRA_MESSAGE="Publication sur Github Releases et mise à jour du dépôt SPM réussies."
+            RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${VERSION}"
+            RELEASE_ACTION="{
+              \"type\": \"Action.OpenUrl\",
+              \"title\": \"🚀 Voir la release\",
+              \"url\": \"${RELEASE_URL}\"
+            },"
           elif [[ "$OVERALL_STATUS" == "failure" ]]; then
             ICON_COLOR="Attention"
             ICON="DismissCircle"
             STATUS_TEXT="❌ Échec"
-            EXTRA_MESSAGE="Échec lors du processus de ${NOTIFICATION_TYPE}."
+            EXTRA_MESSAGE="Échec lors de l'étape ${NOTIFICATION_TYPE}."
             RELEASE_ACTION=""
           else
             ICON_COLOR="Warning"
@@ -293,7 +533,8 @@ jobs:
                         { "title": "Branch/Tag:", "value": "${BRANCH}" },
                         { "title": "Auteur:", "value": "${{ github.actor }}" },
                         { "title": "Build Status:", "value": "${BUILD_RESULT}" },
-                        { "title": "Release Status:", "value": "${RELEASE_RESULT}" }
+                        { "title": "Release Status:", "value": "${RELEASE_RESULT}" },
+                        { "title": "SPM Status:", "value": "${SPM_RESULT}" }
                       ],
                       "separator": true
                     },
