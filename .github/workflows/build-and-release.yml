@@ -34,6 +34,7 @@ permissions:
 env:
   SPM_REPOSITORY: monext-ios-sdk-spm
   PLIST: Sources/Monext/AppMetadata.plist
+  README: README.md
 
 jobs:
   prepare:
@@ -132,18 +133,24 @@ jobs:
             python3 -c "import plistlib, sys; print(plistlib.load(open(sys.argv[1], 'rb'))['CFBundleShortVersionString'])" "$PLIST"
           }
 
+          sed -i '/<key>CFBundleShortVersionString<\/key>/{n;s|<string>[^<]*</string>|<string>'"$VERSION"'</string>|;}' "$PLIST"
           if [[ "$(read_version)" != "$VERSION" ]]; then
-            sed -i '/<key>CFBundleShortVersionString<\/key>/{n;s|<string>[^<]*</string>|<string>'"$VERSION"'</string>|;}' "$PLIST"
-            if [[ "$(read_version)" != "$VERSION" ]]; then
-              echo "::error::Impossible de mettre à jour la version dans $PLIST"
-              exit 1
-            fi
+            echo "::error::Impossible de mettre à jour la version dans $PLIST"
+            exit 1
+          fi
+
+          sed -i -E 's/(Use version `)[0-9]+\.[0-9]+\.[0-9]+(` or later)/\1'"$VERSION"'\2/' "$README"
+          if ! grep -qF "Use version \`$VERSION\` or later" "$README"; then
+            echo "::warning::Ligne \"Use version ... or later\" introuvable dans $README, version non mise à jour"
+          fi
+
+          if ! git diff --quiet -- "$PLIST" "$README"; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git commit -m "Update version to $VERSION" -- "$PLIST"
+            git commit -m "Update version to $VERSION" -- "$PLIST" "$README"
             git push origin HEAD:develop
           else
-            echo "La version $VERSION est déjà dans $PLIST, pas de commit"
+            echo "La version $VERSION est déjà dans $PLIST et $README, pas de commit"
           fi
 
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
