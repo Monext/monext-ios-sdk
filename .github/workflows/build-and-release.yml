@@ -68,6 +68,18 @@ jobs:
           owner: ${{ github.repository_owner }}
           repositories: ${{ github.event.repository.name }}
 
+      - name: Show release identity
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+        run: |
+          echo "::notice::App utilisée : $APP_SLUG"
+          for ID in $(gh api "repos/$GITHUB_REPOSITORY/rulesets" --jq '.[].id'); do
+            gh api "repos/$GITHUB_REPOSITORY/rulesets/$ID" \
+              --jq '"::notice::Règle \(.name) : contournement par cette App = \(.current_user_can_bypass // "inconnu")"'
+          done
+
       - name: Checkout develop
         uses: actions/checkout@v4
         with:
@@ -126,6 +138,7 @@ jobs:
         id: commit
         env:
           VERSION: ${{ steps.version.outputs.version }}
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
         run: |
           set -euo pipefail
 
@@ -148,7 +161,10 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git commit -m "Update version to $VERSION" -- "$PLIST" "$README"
-            git push origin HEAD:develop
+            if ! git push origin HEAD:develop; then
+              echo "::error::Push refusé sur develop pour l'App $APP_SLUG : elle doit être en « Always allow » dans les exceptions de la règle de branche (voir l'étape Show release identity)"
+              exit 1
+            fi
           else
             echo "La version $VERSION est déjà dans $PLIST et $README, pas de commit"
           fi
@@ -287,10 +303,15 @@ jobs:
           name: monext-build-${{ needs.prepare.outputs.version }}-${{ github.run_number }}
 
       - name: Fast-forward main and tag
+        env:
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
         run: |
           set -euo pipefail
 
-          git push origin "$SHA:refs/heads/main"
+          if ! git push origin "$SHA:refs/heads/main"; then
+            echo "::error::Push refusé sur main pour l'App $APP_SLUG : elle doit être en « Always allow » dans les exceptions de la règle de branche"
+            exit 1
+          fi
 
           EXISTING=$(git ls-remote origin "refs/tags/$VERSION" | cut -f1)
           if [[ -z "$EXISTING" ]]; then
@@ -410,6 +431,7 @@ jobs:
       - name: Commit, tag and release
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
         run: |
           set -euo pipefail
 
@@ -417,7 +439,10 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git commit -m "Release $VERSION" -- Package.swift
-            git push origin HEAD:main
+            if ! git push origin HEAD:main; then
+              echo "::error::Push refusé sur main de $SPM_REPOSITORY pour l'App $APP_SLUG : elle doit être exemptée de la protection de branche de ce dépôt"
+              exit 1
+            fi
           else
             echo "Package.swift pointe déjà sur la version $VERSION, pas de commit"
           fi
