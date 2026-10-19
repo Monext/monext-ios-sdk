@@ -80,6 +80,16 @@ jobs:
               --jq '"::notice::Règle \(.name) : contournement par cette App = \(.current_user_can_bypass // "inconnu")"'
           done
 
+      - name: Get commit identity
+        id: identity
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+        run: |
+          USER_ID=$(gh api "/users/${APP_SLUG}[bot]" --jq .id)
+          echo "name=${APP_SLUG}[bot]" >> "$GITHUB_OUTPUT"
+          echo "email=${USER_ID}+${APP_SLUG}[bot]@users.noreply.github.com" >> "$GITHUB_OUTPUT"
+
       - name: Checkout develop
         uses: actions/checkout@v4
         with:
@@ -139,6 +149,8 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.version }}
           APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+          GIT_NAME: ${{ steps.identity.outputs.name }}
+          GIT_EMAIL: ${{ steps.identity.outputs.email }}
         run: |
           set -euo pipefail
 
@@ -158,8 +170,8 @@ jobs:
           fi
 
           if ! git diff --quiet -- "$PLIST" "$README"; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git config user.name "$GIT_NAME"
+            git config user.email "$GIT_EMAIL"
             git commit -m "Update version to $VERSION" -- "$PLIST" "$README"
             if ! git push origin HEAD:develop; then
               echo "::error::Push refusé sur develop pour l'App $APP_SLUG : elle doit être en « Always allow » dans les exceptions de la règle de branche (voir l'étape Show release identity)"
@@ -387,6 +399,16 @@ jobs:
           owner: ${{ github.repository_owner }}
           repositories: ${{ env.SPM_REPOSITORY }}
 
+      - name: Get commit identity
+        id: identity
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+        run: |
+          USER_ID=$(gh api "/users/${APP_SLUG}[bot]" --jq .id)
+          echo "name=${APP_SLUG}[bot]" >> "$GITHUB_OUTPUT"
+          echo "email=${USER_ID}+${APP_SLUG}[bot]@users.noreply.github.com" >> "$GITHUB_OUTPUT"
+
       - name: Checkout SPM repository
         uses: actions/checkout@v4
         with:
@@ -432,12 +454,14 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+          GIT_NAME: ${{ steps.identity.outputs.name }}
+          GIT_EMAIL: ${{ steps.identity.outputs.email }}
         run: |
           set -euo pipefail
 
           if ! git diff --quiet -- Package.swift; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git config user.name "$GIT_NAME"
+            git config user.email "$GIT_EMAIL"
             git commit -m "Release $VERSION" -- Package.swift
             if ! git push origin HEAD:main; then
               echo "::error::Push refusé sur main de $SPM_REPOSITORY pour l'App $APP_SLUG : elle doit être exemptée de la protection de branche de ce dépôt"
