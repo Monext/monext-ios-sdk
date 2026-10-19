@@ -44,7 +44,7 @@ Monext iOS SDK is available via [Swift Package Manager](https://www.swift.org/do
    *(Ensure you replace this with the correct repository URL if needed.)*
 
 3. **Specify the Version:**  
-   Use version `1.0.7` or later.
+   Use version `1.0.10` or later.
 
 ## Security Best Practices
 
