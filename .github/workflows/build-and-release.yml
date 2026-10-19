@@ -74,10 +74,10 @@ jobs:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
         run: |
-          echo "App utilisée : $APP_SLUG"
+          echo "::notice::App utilisée : $APP_SLUG"
           for ID in $(gh api "repos/$GITHUB_REPOSITORY/rulesets" --jq '.[].id'); do
             gh api "repos/$GITHUB_REPOSITORY/rulesets/$ID" \
-              --jq '"Règle \(.name) : contournement par cette App = \(.current_user_can_bypass // "inconnu")"'
+              --jq '"::notice::Règle \(.name) : contournement par cette App = \(.current_user_can_bypass // "inconnu")"'
           done
 
       - name: Checkout develop
